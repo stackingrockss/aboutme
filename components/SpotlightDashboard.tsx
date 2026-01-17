@@ -404,7 +404,7 @@ export default function SpotlightDashboard() {
       />
 
       {/* CRT Flicker */}
-      <div className="fixed inset-0 pointer-events-none z-10 animate-subtle-pulse bg-green-500" />
+      <div className="fixed inset-0 pointer-events-none z-10 animate-pulse opacity-[0.02] bg-green-500" />
 
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-10 relative z-20">
