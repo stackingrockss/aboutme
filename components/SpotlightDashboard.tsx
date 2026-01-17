@@ -377,49 +377,8 @@ export default function SpotlightDashboard() {
     setPhotoPage(0);
   };
 
-  // Collage layout classes based on number of photos on current page
-  const getCollageClass = (index: number, total: number): string => {
-    if (total === 4) {
-      const classes = [
-        'col-span-2 row-span-2', // large left
-        'col-span-1 row-span-1', // small top-right
-        'col-span-1 row-span-1', // small mid-right
-        'col-span-3 row-span-1', // wide bottom
-      ];
-      return classes[index];
-    }
-    if (total === 3) {
-      const classes = [
-        'col-span-1 row-span-1', // small top-left
-        'col-span-2 row-span-2', // large right
-        'col-span-1 row-span-1', // small bottom-left
-      ];
-      return classes[index];
-    }
-    if (total === 2) {
-      return 'col-span-1 row-span-1';
-    }
-    if (total === 1) {
-      return 'col-span-3 row-span-2';
-    }
-    return 'col-span-1 row-span-1';
-  };
-
   const closeModal = () => {
     setSelectedCard(null);
-  };
-
-  const handleFunFactsHover = () => {
-    chopinAudio.current?.play().catch(() => {
-      // Autoplay blocked until user interaction
-    });
-  };
-
-  const handleFunFactsLeave = () => {
-    if (chopinAudio.current) {
-      chopinAudio.current.pause();
-      chopinAudio.current.currentTime = 0;
-    }
   };
 
   return (
@@ -460,13 +419,10 @@ export default function SpotlightDashboard() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative z-20">
         {cards.map((card, index) => {
           const IconComponent = card.icon;
-          const isFunFacts = card.title === 'Fun Facts';
           return (
             <button
               key={card.id}
               onClick={() => handleCardClick(card)}
-              onMouseEnter={isFunFacts ? handleFunFactsHover : undefined}
-              onMouseLeave={isFunFacts ? handleFunFactsLeave : undefined}
               className={`
                 relative bg-black/80 border border-green-500/50
                 p-5 rounded-lg text-left
@@ -566,7 +522,7 @@ export default function SpotlightDashboard() {
                 {'>'} cat /data/{selectedCard.title.toLowerCase()}.log
               </div>
 
-              {/* Photo Gallery with Collage Layout and Pagination */}
+              {/* Photo Gallery with Pagination */}
               {selectedCard.content.photos.length > 0 ? (
                 (() => {
                   const PHOTOS_PER_PAGE = 4;
@@ -579,31 +535,19 @@ export default function SpotlightDashboard() {
 
                   return (
                     <div className="mb-4">
-                      {/* Collage Grid - use explicit row heights */}
-                      <div
-                        className="grid grid-cols-3 gap-2"
-                        style={{
-                          gridTemplateRows: currentPhotos.length === 4
-                            ? '1fr 1fr 1fr'
-                            : currentPhotos.length === 3
-                              ? '1fr 1fr'
-                              : currentPhotos.length === 1
-                                ? '1fr'
-                                : '1fr 1fr',
-                          height: '55vh'
-                        }}
-                      >
+                      {/* Simple 2x2 Grid */}
+                      <div className="grid grid-cols-2 gap-3">
                         {currentPhotos.map((photo, index) => (
                           <button
                             key={index}
                             onClick={() => openLightbox(photos, photoPage * PHOTOS_PER_PAGE + index)}
-                            className={`${getCollageClass(index, currentPhotos.length)} rounded overflow-hidden border border-green-500/50 hover:border-green-400 transition-colors`}
+                            className="aspect-[4/3] rounded overflow-hidden border border-green-500/50 hover:border-green-400 transition-colors"
                           >
                             <Image
                               src={photo.src}
                               alt={photo.alt || selectedCard.content.headline}
                               width={600}
-                              height={400}
+                              height={450}
                               className="w-full h-full object-cover"
                             />
                           </button>
@@ -644,7 +588,12 @@ export default function SpotlightDashboard() {
               {/* Facts as terminal output */}
               <div className="space-y-2">
                 {selectedCard.content.facts.map((fact, i) => (
-                  <div key={i} className="flex items-start gap-2">
+                  <div
+                    key={i}
+                    className="flex items-start gap-2 cursor-default"
+                    onMouseEnter={() => handleFactHover(fact)}
+                    onMouseLeave={() => handleFactLeave(fact)}
+                  >
                     <span className="text-green-600 flex-shrink-0">[{String(i + 1).padStart(2, '0')}]</span>
                     <span className="text-green-400">{fact}</span>
                   </div>
