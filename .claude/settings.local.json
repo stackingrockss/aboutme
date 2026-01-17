@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init -p)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(./node_modules/.bin/tailwindcss:*)",
+      "Bash(npm run dev:*)",
+      "Bash(ipconfig:*)",
+      "Bash(curl:*)",
+      "Bash(npm run build:*)",
+      "Bash(findstr:*)",
+      "Bash(git init:*)",
+      "Bash(cmd //c \"del nul\")"
+    ]
+  }
+}
