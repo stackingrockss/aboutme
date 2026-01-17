@@ -62,7 +62,13 @@ const cards: Card[] = [
         'Currently dealing with ear issues (dog parent life)'
       ],
       photos: [
-        { src: '/images/dog.jpg', alt: 'Our Leonberger' }
+        { src: '/images/molly1.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly2.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly3.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly4.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly5.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly6.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly7.jpg', alt: 'Molly the Leonberger' }
       ]
     }
   },
@@ -444,8 +450,8 @@ export default function SpotlightDashboard() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="border border-green-500/30 p-4 rounded bg-black/50">
-            <p className="text-green-400 text-2xl font-bold font-mono">50+</p>
-            <p className="text-green-700 text-xs uppercase tracking-wider">smart_switches</p>
+            <p className="text-green-400 text-2xl font-bold font-mono">005</p>
+            <p className="text-green-700 text-xs uppercase tracking-wider">family_members</p>
           </div>
           <div className="border border-green-500/30 p-4 rounded bg-black/50">
             <p className="text-green-400 text-2xl font-bold font-mono">001</p>
@@ -453,7 +459,7 @@ export default function SpotlightDashboard() {
           </div>
           <div className="border border-green-500/30 p-4 rounded bg-black/50">
             <p className="text-green-400 text-2xl font-bold font-mono">001</p>
-            <p className="text-green-700 text-xs uppercase tracking-wider">fitness_app</p>
+            <p className="text-green-700 text-xs uppercase tracking-wider">cars_ignited</p>
           </div>
           <div className="border border-green-500/30 p-4 rounded bg-black/50">
             <p className="text-green-400 text-2xl font-bold font-mono">INF</p>
