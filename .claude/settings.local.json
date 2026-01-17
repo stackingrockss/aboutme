@@ -12,7 +12,12 @@
       "Bash(npm run build:*)",
       "Bash(findstr:*)",
       "Bash(git init:*)",
-      "Bash(cmd //c \"del nul\")"
+      "Bash(cmd //c \"del nul\")",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate Claude settings with git remote permissions\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
