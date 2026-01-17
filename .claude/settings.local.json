@@ -18,7 +18,8 @@
       "Bash(git push:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate Claude settings with git remote permissions\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nMove Next.js app from spotlight/ to root\n\nRestructured project so Vercel can detect the Next.js app\nat the repository root for proper deployment.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nMove Next.js app from spotlight/ to root\n\nRestructured project so Vercel can detect the Next.js app\nat the repository root for proper deployment.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
     ]
   }
 }

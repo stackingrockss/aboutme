@@ -59,7 +59,7 @@ const cards: Card[] = [
         "Yes, that's a real breed",
         'Basically a small horse that sheds',
         'Gentle giant energy',
-        'Currently dealing with ear issues (dog parent life)'
+        'Kill count: 6 mice, 3 voles, 1 bird'
       ],
       photos: [
         { src: '/images/molly1.jpg', alt: 'Molly the Leonberger' },
@@ -81,13 +81,18 @@ const cards: Card[] = [
     content: {
       headline: 'Personal Projects',
       facts: [
-        'Cipher - Fitness tracking app with AI coach "Kyron" (Next.js + TypeScript)',
-        'MeetingPicker - Chrome extension to share Google Calendar availability in seconds (no links, just formatted text)',
-        'Briefcase - AI-powered sales CRM with call intelligence, account research & deal acceleration (Next.js + Gemini)',
-        'Debian Server - Self-hosted infrastructure backbone',
-        'Frigate - NVR with AI object detection for home security',
-        'Home Assistant - Smart home automation hub (50+ devices)',
-        'Immich - Self-hosted Google Photos alternative for private photo backup'
+        'Cipher - "AI-powered fitness tracking with custom coach Kyron"',
+        '  (Next.js, TypeScript, Tailwind, shadcn/ui, Supabase, Prisma, Zustand, Gemini)',
+        'MeetingPicker - "Chrome extension to share Google Calendar availability instantly"',
+        '  (Plasmo, React, TypeScript, Tailwind, Luxon, Shadow DOM)',
+        'EdgeTracker - "Trading journal with AI-powered pattern analysis"',
+        '  (Django, DRF, React 19, Vite, TanStack Router, Zustand, Tailwind, shadcn/ui, Gemini)',
+        'Briefcase - "AI-powered deal intelligence for strategic enterprise sales"',
+        '  (Next.js 15, React 19, Tailwind v4, shadcn/ui, Prisma, Supabase, Zustand, Inngest, Gemini, ReactFlow)',
+        'Debian Server - "Self-hosted infrastructure backbone"',
+        '  └ Frigate - NVR with AI object detection',
+        '  └ Home Assistant - Smart home automation (50+ devices)',
+        '  └ Immich - Private photo backup (Google Photos alternative)'
       ],
       photos: [
         { src: '/images/projects.jpg', alt: 'Projects screenshot' }
@@ -297,6 +302,7 @@ function useLiveStats() {
 export default function SpotlightDashboard() {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [lightbox, setLightbox] = useState<{ photos: Photo[]; index: number } | null>(null);
+  const [photoPage, setPhotoPage] = useState(0);
   const { displayedText, isComplete } = useTypingEffect('> SYSTEM INITIALIZED', 80);
   const { ping, cpu, mem } = useLiveStats();
   const beethovenAudio = useRef<HTMLAudioElement | null>(null);
@@ -340,6 +346,35 @@ export default function SpotlightDashboard() {
 
   const handleCardClick = (card: Card) => {
     setSelectedCard(card);
+    setPhotoPage(0);
+  };
+
+  // Collage layout classes based on number of photos on current page
+  const getCollageClass = (index: number, total: number): string => {
+    if (total === 4) {
+      const classes = [
+        'col-span-2 row-span-2', // large left
+        'col-span-1 row-span-1', // small top-right
+        'col-span-1 row-span-1', // small mid-right
+        'col-span-3 row-span-1', // wide bottom
+      ];
+      return classes[index];
+    }
+    if (total === 3) {
+      const classes = [
+        'col-span-1 row-span-1', // small top-left
+        'col-span-2 row-span-2', // large right
+        'col-span-1 row-span-1', // small bottom-left
+      ];
+      return classes[index];
+    }
+    if (total === 2) {
+      return 'col-span-1 row-span-1';
+    }
+    if (total === 1) {
+      return 'col-span-3 row-span-2';
+    }
+    return 'col-span-1 row-span-1';
   };
 
   const closeModal = () => {
@@ -478,7 +513,7 @@ export default function SpotlightDashboard() {
           onClick={closeModal}
         >
           <div
-            className="bg-black border-2 border-green-500 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto shadow-[0_0_50px_rgba(0,255,0,0.2)] relative"
+            className="bg-black border-2 border-green-500 rounded-lg max-w-5xl w-full max-h-[90vh] overflow-auto shadow-[0_0_50px_rgba(0,255,0,0.2)] relative"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Terminal Header */}
@@ -503,25 +538,63 @@ export default function SpotlightDashboard() {
                 {'>'} cat /data/{selectedCard.title.toLowerCase()}.log
               </div>
 
-              {/* Photo Gallery */}
+              {/* Photo Gallery with Collage Layout and Pagination */}
               {selectedCard.content.photos.length > 0 ? (
-                <div className="columns-2 md:columns-3 gap-3 mb-6">
-                  {selectedCard.content.photos.map((photo, index) => (
-                    <button
-                      key={index}
-                      onClick={() => openLightbox(selectedCard.content.photos, index)}
-                      className="w-full mb-3 rounded overflow-hidden border border-green-500/50 hover:border-green-400 transition-colors break-inside-avoid block"
-                    >
-                      <Image
-                        src={photo.src}
-                        alt={photo.alt || selectedCard.content.headline}
-                        width={400}
-                        height={300}
-                        className="w-full h-auto object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
+                (() => {
+                  const PHOTOS_PER_PAGE = 4;
+                  const photos = selectedCard.content.photos;
+                  const totalPages = Math.ceil(photos.length / PHOTOS_PER_PAGE);
+                  const currentPhotos = photos.slice(
+                    photoPage * PHOTOS_PER_PAGE,
+                    (photoPage + 1) * PHOTOS_PER_PAGE
+                  );
+
+                  return (
+                    <div className="mb-4">
+                      {/* Collage Grid */}
+                      <div className="grid grid-cols-3 grid-rows-3 gap-2 h-[50vh]">
+                        {currentPhotos.map((photo, index) => (
+                          <button
+                            key={index}
+                            onClick={() => openLightbox(photos, photoPage * PHOTOS_PER_PAGE + index)}
+                            className={`${getCollageClass(index, currentPhotos.length)} rounded overflow-hidden border border-green-500/50 hover:border-green-400 transition-colors`}
+                          >
+                            <Image
+                              src={photo.src}
+                              alt={photo.alt || selectedCard.content.headline}
+                              width={600}
+                              height={400}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {photos.length > PHOTOS_PER_PAGE && (
+                        <div className="flex justify-center items-center gap-4 mt-3">
+                          <button
+                            onClick={() => setPhotoPage(p => p - 1)}
+                            disabled={photoPage === 0}
+                            className="p-2 text-green-400 hover:text-green-300 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <ChevronLeft className="w-6 h-6" />
+                          </button>
+                          <span className="text-green-400 text-sm font-mono">
+                            [{photoPage + 1}/{totalPages}]
+                          </span>
+                          <button
+                            onClick={() => setPhotoPage(p => p + 1)}
+                            disabled={photoPage >= totalPages - 1}
+                            className="p-2 text-green-400 hover:text-green-300 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <ChevronRight className="w-6 h-6" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="w-full h-48 rounded border-2 border-dashed border-green-500/30 mb-6 flex items-center justify-center bg-green-500/5">
                   <p className="text-green-700 font-mono">{'>'} NO_IMAGE_DATA_FOUND</p>
