@@ -305,13 +305,41 @@ export default function SpotlightDashboard() {
   const [photoPage, setPhotoPage] = useState(0);
   const { displayedText, isComplete } = useTypingEffect('> SYSTEM INITIALIZED', 80);
   const { ping, cpu, mem } = useLiveStats();
-  const beethovenAudio = useRef<HTMLAudioElement | null>(null);
+  const chopinAudio = useRef<HTMLAudioElement | null>(null);
+  const funeralAudio = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    beethovenAudio.current = new Audio('/audio/beethoven.mp3');
-    beethovenAudio.current.volume = 0.3;
-    beethovenAudio.current.loop = true;
+    chopinAudio.current = new Audio('/audio/chopin.mp3');
+    chopinAudio.current.volume = 0.3;
+    chopinAudio.current.loop = true;
+
+    funeralAudio.current = new Audio('/audio/funeral.mp3');
+    funeralAudio.current.volume = 0.3;
+    funeralAudio.current.loop = true;
   }, []);
+
+  const getAudioForFact = (fact: string): HTMLAudioElement | null => {
+    if (fact.toLowerCase().includes('composer') || fact.toLowerCase().includes('chopin')) {
+      return chopinAudio.current;
+    }
+    if (fact.toLowerCase().includes('mortuary')) {
+      return funeralAudio.current;
+    }
+    return null;
+  };
+
+  const handleFactHover = (fact: string) => {
+    const audio = getAudioForFact(fact);
+    audio?.play().catch(() => {});
+  };
+
+  const handleFactLeave = (fact: string) => {
+    const audio = getAudioForFact(fact);
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  };
 
   const openLightbox = (photos: Photo[], index: number) => {
     setLightbox({ photos, index });
@@ -382,15 +410,15 @@ export default function SpotlightDashboard() {
   };
 
   const handleFunFactsHover = () => {
-    beethovenAudio.current?.play().catch(() => {
+    chopinAudio.current?.play().catch(() => {
       // Autoplay blocked until user interaction
     });
   };
 
   const handleFunFactsLeave = () => {
-    if (beethovenAudio.current) {
-      beethovenAudio.current.pause();
-      beethovenAudio.current.currentTime = 0;
+    if (chopinAudio.current) {
+      chopinAudio.current.pause();
+      chopinAudio.current.currentTime = 0;
     }
   };
 
@@ -551,8 +579,20 @@ export default function SpotlightDashboard() {
 
                   return (
                     <div className="mb-4">
-                      {/* Collage Grid */}
-                      <div className="grid grid-cols-3 grid-rows-3 gap-2 h-[50vh]">
+                      {/* Collage Grid - use explicit row heights */}
+                      <div
+                        className="grid grid-cols-3 gap-2"
+                        style={{
+                          gridTemplateRows: currentPhotos.length === 4
+                            ? '1fr 1fr 1fr'
+                            : currentPhotos.length === 3
+                              ? '1fr 1fr'
+                              : currentPhotos.length === 1
+                                ? '1fr'
+                                : '1fr 1fr',
+                          height: '55vh'
+                        }}
+                      >
                         {currentPhotos.map((photo, index) => (
                           <button
                             key={index}
