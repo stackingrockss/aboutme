@@ -43,7 +43,15 @@ const cards: Card[] = [
       photos: [
         { src: '/images/family1.jpg', alt: 'Family photo 1' },
         { src: '/images/family2.jpg', alt: 'Family photo 2' },
-        { src: '/images/family3.jpg', alt: 'Family photo 3' }
+        { src: '/images/family3.jpg', alt: 'Family photo 3' },
+        { src: '/images/bamff-family.jpg', alt: 'Bamff family' },
+        { src: '/images/matt-and-tiffany-waterfall.jpg', alt: 'Matt and Tiffany at waterfall' },
+        { src: '/images/matt-and-tiffany.jpg', alt: 'Matt and Tiffany' },
+        { src: '/images/matt-and-tiffany-2.jpg', alt: 'Matt and Tiffany' },
+        { src: '/images/matt-and-daniel.jpg', alt: 'Matt and Daniel' },
+        { src: '/images/family-pic.jpg', alt: 'Family picture' },
+        { src: '/images/family-pic-mountains.jpg', alt: 'Family picture in mountains' },
+        { src: '/images/grandparents-with-kids.jpg', alt: 'Grandparents with kids' }
       ]
     }
   },
@@ -81,15 +89,16 @@ const cards: Card[] = [
     content: {
       headline: 'Personal Projects',
       facts: [
-        'Cipher - "AI-powered fitness tracking with custom coach Kyron"',
-        '  (Next.js, TypeScript, Tailwind, shadcn/ui, Supabase, Prisma, Zustand, Gemini)',
-        'MeetingPicker - "Chrome extension to share Google Calendar availability instantly"',
-        '  (Plasmo, React, TypeScript, Tailwind, Luxon, Shadow DOM)',
-        'EdgeTracker - "Trading journal with AI-powered pattern analysis"',
-        '  (Django, DRF, React 19, Vite, TanStack Router, Zustand, Tailwind, shadcn/ui, Gemini)',
-        'Briefcase - "AI-powered deal intelligence for strategic enterprise sales"',
-        '  (Next.js 15, React 19, Tailwind v4, shadcn/ui, Prisma, Supabase, Zustand, Inngest, Gemini, ReactFlow)',
-        'Debian Server - "Self-hosted infrastructure backbone"',
+        'Cipher - AI-powered fitness tracking with custom coach Kyron',
+        '  ├ Next.js, TypeScript, Tailwind, shadcn/ui, Supabase, Prisma, Zustand, Gemini',
+        '  └ Zeus GroupMe Bot - Gemini-powered chat bot',
+        'MeetingPicker - Chrome extension to share Google Calendar availability instantly',
+        '  └ Plasmo, React, TypeScript, Tailwind, Luxon, Shadow DOM',
+        'EdgeTracker - Trading journal with AI-powered pattern analysis',
+        '  └ Django, DRF, React 19, Vite, TanStack Router, Zustand, Tailwind, shadcn/ui, Gemini',
+        'Briefcase - AI-powered deal intelligence for strategic enterprise sales',
+        '  └ Next.js 15, React 19, Tailwind v4, shadcn/ui, Prisma, Supabase, Zustand, Inngest, Gemini, ReactFlow',
+        'Debian Server - Self-hosted infrastructure backbone',
         '  └ Frigate - NVR with AI object detection',
         '  └ Home Assistant - Smart home automation (50+ devices)',
         '  └ Immich - Private photo backup (Google Photos alternative)'
@@ -395,7 +404,7 @@ export default function SpotlightDashboard() {
       />
 
       {/* CRT Flicker */}
-      <div className="fixed inset-0 pointer-events-none z-10 animate-pulse opacity-[0.02] bg-green-500" />
+      <div className="fixed inset-0 pointer-events-none z-10 animate-subtle-pulse bg-green-500" />
 
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-10 relative z-20">
