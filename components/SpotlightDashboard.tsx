@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Heart, Dog, Dumbbell, Gamepad2, UtensilsCrossed, Sparkles, Plane, ChevronLeft, ChevronRight, LucideIcon, FolderGit2, Terminal } from 'lucide-react';
+import { X, Heart, Dog, Gamepad2, UtensilsCrossed, Sparkles, ChevronLeft, ChevronRight, LucideIcon, FolderGit2, Terminal } from 'lucide-react';
 import Image from 'next/image';
 
 type Photo = {
@@ -63,25 +63,6 @@ const cards: Card[] = [
       ],
       photos: [
         { src: '/images/dog.jpg', alt: 'Our Leonberger' }
-      ]
-    }
-  },
-  {
-    id: 3,
-    icon: Dumbbell,
-    title: 'Fitness',
-    preview: 'Gains szn',
-    gradient: 'from-green-500 to-emerald-600',
-    content: {
-      headline: 'The Fitness Journey',
-      facts: [
-        'Strength training focus',
-        'Currently in bulk/cut cycle optimization',
-        'Incline dumbbell press progression',
-        'Building an app for this (of course)'
-      ],
-      photos: [
-        { src: '/images/fitness.jpg', alt: 'Fitness photo' }
       ]
     }
   },
@@ -164,25 +145,6 @@ const cards: Card[] = [
       ]
     }
   },
-  {
-    id: 9,
-    icon: Plane,
-    title: 'Travel',
-    preview: 'Places & adventures',
-    gradient: 'from-green-500 to-emerald-600',
-    content: {
-      headline: 'Adventures & Destinations',
-      facts: [
-        '[Favorite place visited]',
-        '[Dream destination]',
-        '[Travel style - adventurer, relaxer, etc.]',
-        '[Memorable trip story]'
-      ],
-      photos: [
-        { src: '/images/travel.jpg', alt: 'Travel photo' }
-      ]
-    }
-  }
 ];
 
 // Matrix Rain Component
@@ -426,7 +388,7 @@ export default function SpotlightDashboard() {
       </div>
 
       {/* Card Grid */}
-      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 relative z-20">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative z-20">
         {cards.map((card, index) => {
           const IconComponent = card.icon;
           const isFunFacts = card.title === 'Fun Facts';
