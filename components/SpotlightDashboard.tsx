@@ -145,7 +145,11 @@ const cards: Card[] = [
     gradient: 'from-green-500 to-emerald-600',
     content: {
       headline: 'RANDOM_MEMORY_ACCESS',
-      facts: [],
+      facts: [
+        'I worked at a mortuary',
+        'My favorite composer is Chopin',
+        'I accidentally set my car on fire'
+      ],
       photos: []
     }
   },
@@ -273,6 +277,271 @@ function GlitchText({ children, className = '' }: { children: string; className?
   );
 }
 
+// Random Flicker Hook - picks one card at a time to flicker
+function useRandomFlicker(cardCount: number) {
+  const [flickeringId, setFlickeringId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const triggerFlicker = () => {
+      // Pick a random card index
+      const randomIndex = Math.floor(Math.random() * cardCount);
+      setFlickeringId(randomIndex);
+
+      // Turn off flicker after brief duration
+      setTimeout(() => setFlickeringId(null), 200);
+
+      // Schedule next flicker at random interval (800ms - 2500ms)
+      const nextDelay = 800 + Math.random() * 1700;
+      setTimeout(triggerFlicker, nextDelay);
+    };
+
+    // Start first flicker after initial delay
+    const initialTimeout = setTimeout(triggerFlicker, 1000);
+
+    return () => clearTimeout(initialTimeout);
+  }, [cardCount]);
+
+  return flickeringId;
+}
+
+// Flicker Text Component for card titles - matches GlitchText RGB chromatic aberration
+function FlickerText({ children, isFlickering }: { children: string; isFlickering: boolean }) {
+  if (!isFlickering) {
+    return <span>{children}</span>;
+  }
+
+  return (
+    <span className="relative inline-block">
+      <span className="animate-pulse">{children}</span>
+      <span className="absolute top-0 left-0 text-red-500 opacity-70" style={{ transform: 'translate(-2px, -1px)' }}>
+        {children}
+      </span>
+      <span className="absolute top-0 left-0 text-cyan-500 opacity-70" style={{ transform: 'translate(2px, 1px)' }}>
+        {children}
+      </span>
+    </span>
+  );
+}
+
+// Beast Creature File Component
+function BeastCreatureFile({ photos, openLightbox }: { photos: Photo[]; openLightbox: (photos: Photo[], index: number) => void }) {
+  const [mode, setMode] = useState<'family' | 'stranger'>('family');
+  const [animatedBars, setAnimatedBars] = useState(false);
+
+  useEffect(() => {
+    // Trigger bar animation after mount
+    const timer = setTimeout(() => setAnimatedBars(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Reset and re-animate bars when mode changes
+  useEffect(() => {
+    setAnimatedBars(false);
+    const timer = setTimeout(() => setAnimatedBars(true), 50);
+    return () => clearTimeout(timer);
+  }, [mode]);
+
+  const stats = {
+    family: {
+      hostility: 0,
+      suspicion: 5,
+      cuddles: 100,
+      threat: 0,
+      label: 'FAMILY_MODE',
+      color: 'green',
+    },
+    stranger: {
+      hostility: 30,
+      suspicion: 90,
+      cuddles: 0,
+      threat: 85,
+      label: 'STRANGER_DETECTED',
+      color: 'amber',
+    },
+  };
+
+  const current = stats[mode];
+  const barColor = mode === 'family' ? 'bg-green-500' : 'bg-amber-500';
+  const textColor = mode === 'family' ? 'text-green-400' : 'text-amber-400';
+  const borderColor = mode === 'family' ? 'border-green-500' : 'border-amber-500';
+
+  const StatBar = ({ label, value }: { label: string; value: number }) => (
+    <div className="flex items-center gap-3">
+      <span className="text-green-600 text-sm w-24">{label}:</span>
+      <div className="flex-1 h-3 bg-green-900/50 rounded overflow-hidden">
+        <div
+          className={`h-full ${barColor} rounded transition-all duration-700 ease-out`}
+          style={{ width: animatedBars ? `${value}%` : '0%' }}
+        />
+      </div>
+      <span className={`${textColor} text-sm w-12 text-right`}>{value}%</span>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="text-green-600 text-sm mb-4">
+        {'>'} ACCESSING CREATURE_DATABASE...
+      </div>
+
+      {/* Mode Toggle */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setMode('family')}
+          className={`
+            flex-1 py-2 px-4 rounded border-2 transition-all duration-300
+            ${mode === 'family'
+              ? 'border-green-500 bg-green-500/20 text-green-400'
+              : 'border-green-500/30 bg-transparent text-green-700 hover:border-green-500/50'
+            }
+          `}
+        >
+          {'>'} FAMILY_MODE
+        </button>
+        <button
+          onClick={() => setMode('stranger')}
+          className={`
+            flex-1 py-2 px-4 rounded border-2 transition-all duration-300
+            ${mode === 'stranger'
+              ? 'border-amber-500 bg-amber-500/20 text-amber-400'
+              : 'border-green-500/30 bg-transparent text-green-700 hover:border-amber-500/50'
+            }
+          `}
+        >
+          {'>'} STRANGER_DETECTED
+        </button>
+      </div>
+
+      {/* Creature File */}
+      <div className={`border-2 ${borderColor} rounded-lg overflow-hidden transition-colors duration-300`}>
+        {/* Header */}
+        <div className={`${mode === 'family' ? 'bg-green-500/10' : 'bg-amber-500/10'} border-b ${borderColor} p-4 transition-colors duration-300`}>
+          <div className="flex items-center justify-between">
+            <span className={`${textColor} font-bold`}>SPECIMEN FILE #001</span>
+            <span className={`${textColor} text-sm animate-pulse`}>[{current.label}]</span>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {/* Classification */}
+          <div className="space-y-1 text-sm">
+            <div className="flex gap-2">
+              <span className="text-green-600">CLASSIFICATION:</span>
+              <span className="text-green-400">Canis lupus familiaris</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-green-600">VARIANT:</span>
+              <span className="text-green-400">Leonberger</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-green-600">CODENAME:</span>
+              <span className={textColor}>&quot;Molly&quot;</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-green-600">SIZE_CLASS:</span>
+              <span className="text-green-400">HORSE-ADJACENT</span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className={`border-t ${borderColor}/50`} />
+
+          {/* Behavioral Analysis */}
+          <div>
+            <div className={`${textColor} text-sm mb-3 font-bold`}>{'>'} BEHAVIORAL_ANALYSIS:</div>
+            <div className="space-y-2">
+              <StatBar label="Hostility" value={current.hostility} />
+              <StatBar label="Suspicion" value={current.suspicion} />
+              <StatBar label="Cuddles" value={current.cuddles} />
+              <StatBar label="Threat" value={current.threat} />
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className={`border-t ${borderColor}/50`} />
+
+          {/* Kill Count */}
+          <div>
+            <div className="text-green-400 text-sm mb-3 font-bold">{'>'} CONFIRMED_ELIMINATIONS:</div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="flex justify-between border border-green-500/30 rounded px-3 py-1">
+                <span className="text-green-600">mice</span>
+                <span className="text-green-400 font-mono">6</span>
+              </div>
+              <div className="flex justify-between border border-green-500/30 rounded px-3 py-1">
+                <span className="text-green-600">voles</span>
+                <span className="text-green-400 font-mono">3</span>
+              </div>
+              <div className="flex justify-between border border-green-500/30 rounded px-3 py-1">
+                <span className="text-green-600">birds</span>
+                <span className="text-green-400 font-mono">1</span>
+              </div>
+              <div className="flex justify-between border border-green-500/50 rounded px-3 py-1 bg-green-500/10">
+                <span className="text-green-500 font-bold">TOTAL</span>
+                <span className="text-green-400 font-mono font-bold">10</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Security Protocol Alert */}
+          {mode === 'stranger' && (
+            <div className="border-2 border-amber-500/50 bg-amber-500/10 rounded p-3 animate-pulse">
+              <div className="flex items-center gap-2">
+                <span className="text-amber-400">⚠</span>
+                <span className="text-amber-400 text-sm font-bold">GUARDIAN_PROTOCOL: ACTIVE</span>
+              </div>
+              <p className="text-amber-600 text-xs mt-1">Stranger proximity triggers protective subroutines</p>
+            </div>
+          )}
+
+          {mode === 'family' && (
+            <div className="border-2 border-green-500/50 bg-green-500/10 rounded p-3">
+              <div className="flex items-center gap-2">
+                <span className="text-green-400">♥</span>
+                <span className="text-green-400 text-sm font-bold">GENTLE_GIANT.exe: RUNNING</span>
+              </div>
+              <p className="text-green-600 text-xs mt-1">Maximum cuddle protocols engaged for pack members</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Photo Gallery */}
+      {photos.length > 0 && (
+        <div className="mt-6">
+          <div className="text-green-600 text-sm mb-3">{'>'} SPECIMEN_IMAGERY:</div>
+          <div className="grid grid-cols-4 gap-2">
+            {photos.slice(0, 4).map((photo, index) => (
+              <button
+                key={index}
+                onClick={() => openLightbox(photos, index)}
+                className="aspect-square rounded overflow-hidden border border-green-500/50 hover:border-green-400 transition-colors"
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt || 'The Beast'}
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+          {photos.length > 4 && (
+            <div className="text-center mt-2">
+              <span className="text-green-700 text-xs">[+{photos.length - 4} more in lightbox]</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
+        {'>'} EOF reached. Press [ESC] or click outside to close.
+      </div>
+    </div>
+  );
+}
+
 // Live Stats Hook
 function useLiveStats() {
   const [ping, setPing] = useState(12);
@@ -367,6 +636,7 @@ export default function SpotlightDashboard() {
 
   const { displayedText, isComplete } = useTypingEffect('> SYSTEM INITIALIZED', 80);
   const { ping, cpu, mem } = useLiveStats();
+  const flickeringCardIndex = useRandomFlicker(cards.length);
   const chopinAudio = useRef<HTMLAudioElement | null>(null);
   const funeralAudio = useRef<HTMLAudioElement | null>(null);
   const carFireVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -630,7 +900,7 @@ export default function SpotlightDashboard() {
                 className="text-green-500 mb-3 group-hover:text-green-400 transition-colors"
               />
               <h3 className="text-green-400 font-bold text-lg mb-1 tracking-wide">
-                [{card.title.toUpperCase()}]
+                [<FlickerText isFlickering={flickeringCardIndex === index}>{card.title.toUpperCase()}</FlickerText>]
               </h3>
               <p className="text-green-600 text-sm font-mono">
                 {'>'} {card.preview}
@@ -700,8 +970,10 @@ export default function SpotlightDashboard() {
             </div>
 
             <div className="p-6 font-mono">
-              {/* Hobbies Card - Icon Grid */}
-              {selectedCard.title === 'Hobbies' ? (
+              {/* Beast Card - Creature File */}
+              {selectedCard.title === 'The Beast' ? (
+                <BeastCreatureFile photos={selectedCard.content.photos} openLightbox={openLightbox} />
+              ) : selectedCard.title === 'Hobbies' ? (
                 <div>
                   <div className="text-green-600 text-sm mb-6">
                     {'>'} loading recreation_protocols...
@@ -886,7 +1158,7 @@ export default function SpotlightDashboard() {
                   {/* Meal Timeline */}
                   <div className="mb-6">
                     <div className="text-green-400 text-sm mb-4 font-bold">{'>'} DAILY_FUEL_SEQUENCE</div>
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start justify-center gap-3">
                       {[
                         { icon: Sun, label: 'Breakfast', details: 'Oatmeal, eggs, greek yogurt + granola' },
                         { icon: Apple, label: 'Snacks', details: '2 protein bars, Cosmic Crisp apple' },
@@ -938,6 +1210,26 @@ export default function SpotlightDashboard() {
                 </div>
               ) : selectedCard.title === 'RAND()' ? (
                 <div className="flex flex-col items-center">
+                  {/* Redacted Facts - Hover to Reveal */}
+                  <div className="w-full mb-6 space-y-2">
+                    <div className="text-green-600 text-sm mb-3">
+                      {'>'} CLASSIFIED_RECORDS [hover to decrypt]
+                    </div>
+                    {selectedCard.content.facts.map((fact, i) => (
+                      <div
+                        key={i}
+                        onMouseEnter={() => handleFactHover(fact, i)}
+                        onMouseLeave={() => handleFactLeave(fact, i)}
+                        className="flex items-center gap-2 p-3 border border-green-500/30 rounded bg-green-500/5 hover:bg-green-500/10 hover:border-green-400 transition-all cursor-pointer group"
+                      >
+                        <span className="text-green-600 flex-shrink-0">[{String(i + 1).padStart(2, '0')}]</span>
+                        <span className={`font-mono transition-all duration-300 ${revealedFacts.has(i) ? 'text-green-400' : 'text-green-700 select-none'}`}>
+                          {revealedFacts.has(i) ? fact : getRedactedText(fact)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
                   {/* Status Text */}
                   <div className="text-green-600 text-sm mb-4 w-full">
                     {randStatusText}

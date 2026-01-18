@@ -22,7 +22,8 @@
       "Bash(git commit:*)",
       "Bash(copy:*)",
       "Bash(git stash:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(taskkill:*)"
     ]
   }
 }
