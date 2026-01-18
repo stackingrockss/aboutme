@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Heart, Dog, Gamepad2, UtensilsCrossed, Dices, ChevronLeft, ChevronRight, LucideIcon, FolderGit2, Terminal, Dumbbell, Bike, Mountain, Snowflake, Footprints, Flower2, Trophy, Baby } from 'lucide-react';
+import { X, Heart, Dog, Gamepad2, UtensilsCrossed, Dices, ChevronLeft, ChevronRight, LucideIcon, FolderGit2, Terminal, Dumbbell, Bike, Mountain, Snowflake, Footprints, Flower2, Trophy, Baby, Sun, Apple, Sandwich, Moon, AlertTriangle, IceCream } from 'lucide-react';
 import Image from 'next/image';
 
 // Random memory photos for RAND() card - add your photos here
@@ -103,9 +103,7 @@ const cards: Card[] = [
         '  └ Home Assistant - Smart home automation (50+ devices)',
         '  └ Immich - Private photo backup (Google Photos alternative)'
       ],
-      photos: [
-        { src: '/images/projects.jpg', alt: 'Projects screenshot' }
-      ]
+      photos: []
     }
   },
   {
@@ -132,13 +130,11 @@ const cards: Card[] = [
         'Breakfast: Oatmeal, 3 eggs + 1/3 cup egg whites, 1⅓ cup greek yogurt + 1/3 cup granola',
         'Snacks: 2 Kirkland protein bars, Cosmic Crisp or Honeycrisp apple',
         'Lunch: 6 slices turkey, 2 slices swiss cheese, collagen & protein shake',
-        'Dinner: Variable (keeps it interesting)',
+        'Dinner: Variable',
         'LOVE rice - could eat it every day',
-        'LOVE ice cream - non-negotiable'
+        'Weakness: Ice cream'
       ],
-      photos: [
-        { src: '/images/food.jpg', alt: 'Food photo' }
-      ]
+      photos: []
     }
   },
   {
@@ -296,6 +292,59 @@ function useLiveStats() {
   return { ping, cpu, mem };
 }
 
+// Tech stack icon mapping
+const techIcons: Record<string, { color: string; abbrev?: string }> = {
+  'Next.js': { color: 'text-white', abbrev: 'Next' },
+  'Next.js 15': { color: 'text-white', abbrev: 'Next15' },
+  'TypeScript': { color: 'text-blue-400', abbrev: 'TS' },
+  'Tailwind': { color: 'text-cyan-400', abbrev: 'TW' },
+  'Tailwind v4': { color: 'text-cyan-400', abbrev: 'TW4' },
+  'shadcn/ui': { color: 'text-white', abbrev: 'shad' },
+  'Supabase': { color: 'text-emerald-400', abbrev: 'Supa' },
+  'Prisma': { color: 'text-indigo-400' },
+  'Zustand': { color: 'text-orange-400', abbrev: 'Zust' },
+  'Gemini': { color: 'text-blue-300' },
+  'Plasmo': { color: 'text-purple-400' },
+  'React': { color: 'text-cyan-300' },
+  'React 19': { color: 'text-cyan-300', abbrev: 'R19' },
+  'Luxon': { color: 'text-yellow-400' },
+  'Shadow DOM': { color: 'text-gray-400', abbrev: 'Shadow' },
+  'Django': { color: 'text-green-600' },
+  'DRF': { color: 'text-red-400' },
+  'Vite': { color: 'text-yellow-300' },
+  'TanStack Router': { color: 'text-orange-300', abbrev: 'TanS' },
+  'Inngest': { color: 'text-pink-400' },
+  'ReactFlow': { color: 'text-purple-300', abbrev: 'Flow' },
+  'Frigate': { color: 'text-blue-500' },
+  'Home Assistant': { color: 'text-cyan-500', abbrev: 'HA' },
+  'Immich': { color: 'text-indigo-300' },
+};
+
+// Build log messages for the terminal animation
+const buildLogMessages = [
+  '$ npm run build',
+  '',
+  '> projects@1.0.0 build',
+  '> next build',
+  '',
+  '   ▲ Next.js 14.0.0',
+  '',
+  '   Creating an optimized production build ...',
+  '   ✓ Compiled successfully',
+  '   ✓ Linting and checking validity of types',
+  '   ✓ Collecting page data',
+  '   ✓ Generating static pages',
+  '   ✓ Finalizing page optimization',
+  '',
+  '   Route (app)              Size     First Load JS',
+  '   ─ /                      5.2 kB        89.1 kB',
+  '   ─ /projects              3.1 kB        87.0 kB',
+  '',
+  '   ✓ Build completed in 2.3s',
+  '',
+  '> Loading project manifests...',
+];
+
 export default function SpotlightDashboard() {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [lightbox, setLightbox] = useState<{ photos: Photo[]; index: number } | null>(null);
@@ -309,6 +358,12 @@ export default function SpotlightDashboard() {
   const [randIsSpinning, setRandIsSpinning] = useState(false);
   const [randStatusText, setRandStatusText] = useState('> AWAITING INPUT...');
   const lastRandPhotoRef = useRef<string | null>(null);
+
+  // Projects card animation state
+  const [projectsBuildPhase, setProjectsBuildPhase] = useState<'building' | 'typing' | 'done'>('building');
+  const [buildLogIndex, setBuildLogIndex] = useState(0);
+  const [visibleProjectLines, setVisibleProjectLines] = useState(0);
+  const [typingLineText, setTypingLineText] = useState('');
 
   const { displayedText, isComplete } = useTypingEffect('> SYSTEM INITIALIZED', 80);
   const { ping, cpu, mem } = useLiveStats();
@@ -421,7 +476,56 @@ export default function SpotlightDashboard() {
     setRandPhoto(null);
     setRandNodesAccessed(0);
     setRandStatusText('> AWAITING INPUT...');
+    // Reset Projects state when closing
+    setProjectsBuildPhase('building');
+    setBuildLogIndex(0);
+    setVisibleProjectLines(0);
+    setTypingLineText('');
   };
+
+  // Projects card build animation effect
+  useEffect(() => {
+    if (!selectedCard || selectedCard.title !== 'Projects') return;
+
+    // Phase 1: Build log animation
+    if (projectsBuildPhase === 'building') {
+      if (buildLogIndex < buildLogMessages.length) {
+        const timer = setTimeout(() => {
+          setBuildLogIndex(prev => prev + 1);
+        }, 80);
+        return () => clearTimeout(timer);
+      } else {
+        // Build complete, move to typing phase
+        const timer = setTimeout(() => {
+          setProjectsBuildPhase('typing');
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+    }
+
+    // Phase 2: Typing animation for project lines
+    if (projectsBuildPhase === 'typing') {
+      const projectFacts = selectedCard.content.facts;
+      if (visibleProjectLines < projectFacts.length) {
+        const currentLine = projectFacts[visibleProjectLines];
+        if (typingLineText.length < currentLine.length) {
+          const timer = setTimeout(() => {
+            setTypingLineText(currentLine.slice(0, typingLineText.length + 1));
+          }, 15);
+          return () => clearTimeout(timer);
+        } else {
+          // Line complete, move to next
+          const timer = setTimeout(() => {
+            setVisibleProjectLines(prev => prev + 1);
+            setTypingLineText('');
+          }, 100);
+          return () => clearTimeout(timer);
+        }
+      } else {
+        setProjectsBuildPhase('done');
+      }
+    }
+  }, [selectedCard, projectsBuildPhase, buildLogIndex, visibleProjectLines, typingLineText]);
 
   const executeRand = () => {
     if (randIsSpinning || randomMemoryPhotos.length === 0) return;
@@ -627,13 +731,203 @@ export default function SpotlightDashboard() {
                     ))}
                   </div>
 
-                  {/* Dr. Mundo Achievement Callout */}
-                  <div className="border-2 border-yellow-500/50 bg-yellow-500/5 rounded-lg p-4 mb-6">
+                  {/* Achievements */}
+                  <div className="space-y-3 mb-6">
+                    <div className="border-2 border-cyan-500/50 bg-cyan-500/5 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <Bike size={32} className="text-cyan-400" />
+                        <div>
+                          <p className="text-cyan-400 font-bold">6,075.3 MILES BIKED</p>
+                          <p className="text-cyan-600 text-sm">2025 Projected Distance</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="border-2 border-yellow-500/50 bg-yellow-500/5 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <Trophy size={32} className="text-yellow-400" />
+                        <div>
+                          <p className="text-yellow-400 font-bold">TOP 100 DR. MUNDO</p>
+                          <p className="text-yellow-600 text-sm">Wild Rift NA Server</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
+                    {'>'} EOF reached. Press [ESC] or click outside to close.
+                  </div>
+                </div>
+              ) : selectedCard.title === 'Projects' ? (
+                <div>
+                  {/* Build Log Animation */}
+                  {projectsBuildPhase === 'building' && (
+                    <div className="bg-black/50 border border-green-500/30 rounded p-4 mb-4 h-64 overflow-hidden">
+                      <div className="space-y-1">
+                        {buildLogMessages.slice(0, buildLogIndex).map((line, i) => (
+                          <div key={i} className={`text-sm ${line.includes('✓') ? 'text-green-400' : line.startsWith('$') ? 'text-green-300' : 'text-green-600'}`}>
+                            {line || '\u00A0'}
+                          </div>
+                        ))}
+                        {buildLogIndex < buildLogMessages.length && (
+                          <span className="text-green-400 animate-pulse">_</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Projects List with Typing Effect */}
+                  {(projectsBuildPhase === 'typing' || projectsBuildPhase === 'done') && (
+                    <div className="space-y-3">
+                      {(() => {
+                        let mainLineCount = 0;
+                        const projectFacts = selectedCard.content.facts;
+                        return projectFacts.map((fact, i) => {
+                          const isTreeLine = fact.trimStart().startsWith('├') || fact.trimStart().startsWith('└');
+                          if (!isTreeLine) mainLineCount++;
+
+                          // Determine if this line should be visible
+                          const isVisible = i < visibleProjectLines || (i === visibleProjectLines && projectsBuildPhase === 'typing');
+                          const isCurrentlyTyping = i === visibleProjectLines && projectsBuildPhase === 'typing';
+                          const displayText = isCurrentlyTyping ? typingLineText : fact;
+
+                          if (!isVisible && projectsBuildPhase !== 'done') return null;
+
+                          // Parse tech stack line into interactive badges
+                          const isTechStackLine = isTreeLine && !fact.includes(' - ');
+
+                          return (
+                            <div
+                              key={i}
+                              className={`flex items-start gap-2 ${isCurrentlyTyping ? '' : 'opacity-100'}`}
+                            >
+                              {isTreeLine ? (
+                                <span className="text-green-600 flex-shrink-0 w-10"></span>
+                              ) : (
+                                <span className="text-green-600 flex-shrink-0 w-10">[{String(mainLineCount).padStart(2, '0')}]</span>
+                              )}
+                              {isTechStackLine && projectsBuildPhase === 'done' ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                  <span className="text-green-600">{fact.match(/^\s*[├└]/)?.[0] || ''}</span>
+                                  {fact.replace(/^\s*[├└]\s*/, '').split(', ').map((tech, j) => {
+                                    const techInfo = techIcons[tech.trim()] || { color: 'text-green-400' };
+                                    return (
+                                      <span
+                                        key={j}
+                                        className={`
+                                          px-2 py-0.5 rounded text-xs border border-green-500/30
+                                          bg-green-500/10 hover:bg-green-500/20 hover:border-green-400
+                                          hover:shadow-[0_0_10px_rgba(0,255,0,0.3)]
+                                          transition-all duration-200 cursor-default
+                                          ${techInfo.color}
+                                        `}
+                                        title={tech.trim()}
+                                      >
+                                        {techInfo.abbrev || tech.trim()}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <span className="text-green-400">
+                                  {displayText}
+                                  {isCurrentlyTyping && <span className="animate-pulse">_</span>}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  )}
+
+                  {projectsBuildPhase === 'done' && (
+                    <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
+                      {'>'} EOF reached. Press [ESC] or click outside to close.
+                    </div>
+                  )}
+                </div>
+              ) : selectedCard.title === 'Food' ? (
+                <div>
+                  <div className="text-green-600 text-sm mb-6">
+                    {'>'} loading nutrition_protocol...
+                  </div>
+
+                  {/* Macro Protocol Panel */}
+                  <div className="border border-green-500/50 rounded-lg p-4 mb-6 bg-green-500/5">
+                    <div className="text-green-400 text-sm mb-4 font-bold">{'>'} MACRO_PROTOCOL</div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-green-600 text-sm w-28">PROTEIN:</span>
+                        <span className="text-green-500 text-sm w-24">1.0-1.2g/lb</span>
+                        <div className="flex-1 h-3 bg-green-900/50 rounded overflow-hidden">
+                          <div className="h-full bg-green-500 rounded" style={{ width: '85%' }} />
+                        </div>
+                        <span className="text-green-400 text-xs">PRIORITY</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-green-600 text-sm w-28">FAT:</span>
+                        <span className="text-green-500 text-sm w-24">25% kcal</span>
+                        <div className="flex-1 h-3 bg-green-900/50 rounded overflow-hidden">
+                          <div className="h-full bg-green-500/70 rounded" style={{ width: '25%' }} />
+                        </div>
+                        <span className="text-green-600 text-xs">REQUIRED</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-green-600 text-sm w-28">CARBS:</span>
+                        <span className="text-green-500 text-sm w-24">remainder</span>
+                        <div className="flex-1 h-3 bg-green-900/50 rounded overflow-hidden">
+                          <div className="h-full bg-green-500/50 rounded" style={{ width: '50%' }} />
+                        </div>
+                        <span className="text-green-700 text-xs">FILL</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Meal Timeline */}
+                  <div className="mb-6">
+                    <div className="text-green-400 text-sm mb-4 font-bold">{'>'} DAILY_FUEL_SEQUENCE</div>
+                    <div className="flex items-start justify-between gap-2">
+                      {[
+                        { icon: Sun, label: 'Breakfast', details: 'Oatmeal, eggs, greek yogurt + granola' },
+                        { icon: Apple, label: 'Snacks', details: '2 protein bars, Cosmic Crisp apple' },
+                        { icon: Sandwich, label: 'Lunch', details: 'Turkey, swiss, collagen shake' },
+                        { icon: Moon, label: 'Dinner', details: 'Variable' },
+                      ].map((meal, i, arr) => (
+                        <div key={i} className="flex items-center">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="w-12 h-12 rounded-lg border border-green-500/50 bg-green-500/10 flex items-center justify-center mb-2 hover:bg-green-500/20 hover:border-green-400 transition-colors">
+                              <meal.icon size={24} className="text-green-400" />
+                            </div>
+                            <span className="text-green-400 text-xs font-bold mb-1">{meal.label}</span>
+                            <span className="text-green-600 text-xs max-w-20 leading-tight">{meal.details}</span>
+                          </div>
+                          {i < arr.length - 1 && (
+                            <div className="text-green-600 mx-1 mt-[-40px]">→</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Favorites */}
+                  <div className="border border-cyan-500/50 bg-cyan-500/5 rounded-lg p-4 mb-4">
                     <div className="flex items-center gap-3">
-                      <Trophy size={32} className="text-yellow-400" />
+                      <UtensilsCrossed size={24} className="text-cyan-400" />
                       <div>
-                        <p className="text-yellow-400 font-bold">TOP 100 DR. MUNDO</p>
-                        <p className="text-yellow-600 text-sm">Wild Rift NA Server</p>
+                        <p className="text-cyan-400 font-bold">STAPLE: RICE</p>
+                        <p className="text-cyan-600 text-sm">Could eat it every day</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Weakness Alert */}
+                  <div className="border-2 border-red-500/50 bg-red-500/5 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle size={24} className="text-red-400" />
+                      <IceCream size={24} className="text-red-300" />
+                      <div>
+                        <p className="text-red-400 font-bold">WEAKNESS_DETECTED</p>
+                        <p className="text-red-600 text-sm">Ice cream - resistance: 0%</p>
                       </div>
                     </div>
                   </div>
@@ -784,15 +1078,26 @@ export default function SpotlightDashboard() {
 
                   {/* Facts as terminal output */}
                   <div className="space-y-3">
-                    {selectedCard.content.facts.map((fact, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-2"
-                      >
-                        <span className="text-green-600 flex-shrink-0">[{String(i + 1).padStart(2, '0')}]</span>
-                        <span className="text-green-400">{fact}</span>
-                      </div>
-                    ))}
+                    {(() => {
+                      let mainLineCount = 0;
+                      return selectedCard.content.facts.map((fact, i) => {
+                        const isTreeLine = fact.trimStart().startsWith('├') || fact.trimStart().startsWith('└');
+                        if (!isTreeLine) mainLineCount++;
+                        return (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2"
+                          >
+                            {isTreeLine ? (
+                              <span className="text-green-600 flex-shrink-0 w-10"></span>
+                            ) : (
+                              <span className="text-green-600 flex-shrink-0 w-10">[{String(mainLineCount).padStart(2, '0')}]</span>
+                            )}
+                            <span className="text-green-400">{fact}</span>
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
 
                   <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
