@@ -1,8 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Heart, Dog, Gamepad2, UtensilsCrossed, Sparkles, ChevronLeft, ChevronRight, LucideIcon, FolderGit2, Terminal } from 'lucide-react';
+import { X, Heart, Dog, Gamepad2, UtensilsCrossed, Dices, ChevronLeft, ChevronRight, LucideIcon, FolderGit2, Terminal, Dumbbell, Bike, Mountain, Snowflake, Footprints, Flower2, Trophy, Baby } from 'lucide-react';
 import Image from 'next/image';
+
+// Random memory photos for RAND() card - add your photos here
+const randomMemoryPhotos: Photo[] = [
+  { src: '/images/random1.jpg', alt: 'Random memory 1' },
+  { src: '/images/random2.jpg', alt: 'Random memory 2' },
+  { src: '/images/random3.jpg', alt: 'Random memory 3' },
+  { src: '/images/random4.jpg', alt: 'Random memory 4' },
+  { src: '/images/random5.jpg', alt: 'Random memory 5' },
+];
 
 type Photo = {
   src: string;
@@ -33,17 +42,8 @@ const cards: Card[] = [
     gradient: 'from-green-500 to-emerald-600',
     content: {
       headline: 'The Family',
-      facts: [
-        'Tiffany - my wife',
-        'Daniel - son',
-        'Emilia - daughter',
-        'Natalie - daughter',
-        'Based in Spokane, WA'
-      ],
+      facts: [],
       photos: [
-        { src: '/images/family1.jpg', alt: 'Family photo 1' },
-        { src: '/images/family2.jpg', alt: 'Family photo 2' },
-        { src: '/images/family3.jpg', alt: 'Family photo 3' },
         { src: '/images/bamff-family.jpg', alt: 'Bamff family' },
         { src: '/images/matt-and-tiffany-waterfall.jpg', alt: 'Matt and Tiffany at waterfall' },
         { src: '/images/matt-and-tiffany.jpg', alt: 'Matt and Tiffany' },
@@ -110,20 +110,14 @@ const cards: Card[] = [
   },
   {
     id: 5,
-    icon: Gamepad2,
+    icon: Dumbbell,
     title: 'Hobbies',
     preview: 'Beyond slanging software',
     gradient: 'from-green-500 to-emerald-600',
     content: {
-      headline: 'When I\'m Not Coding',
-      facts: [
-        '[Add your hobbies here]',
-        '[Gaming, reading, etc.]',
-        '[Weekend activities]'
-      ],
-      photos: [
-        { src: '/images/hobbies.jpg', alt: 'Hobbies photo' }
-      ]
+      headline: 'When I\'m Not Selling',
+      facts: [],
+      photos: []
     }
   },
   {
@@ -149,20 +143,14 @@ const cards: Card[] = [
   },
   {
     id: 8,
-    icon: Sparkles,
-    title: 'Fun Facts',
-    preview: 'Plot twists',
+    icon: Dices,
+    title: 'RAND()',
+    preview: 'Access random memory',
     gradient: 'from-green-500 to-emerald-600',
     content: {
-      headline: 'Two Truths and a Lie',
-      facts: [
-        'I worked at a mortuary',
-        'My favorite composer is Beethoven',
-        'I accidentally set my car on fire'
-      ],
-      photos: [
-        { src: '/images/funfacts.jpg', alt: 'Fun facts photo' }
-      ]
+      headline: 'RANDOM_MEMORY_ACCESS',
+      facts: [],
+      photos: []
     }
   },
 ];
@@ -312,10 +300,21 @@ export default function SpotlightDashboard() {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [lightbox, setLightbox] = useState<{ photos: Photo[]; index: number } | null>(null);
   const [photoPage, setPhotoPage] = useState(0);
+  const [showCarFireVideo, setShowCarFireVideo] = useState(false);
+  const [revealedFacts, setRevealedFacts] = useState<Set<number>>(new Set());
+
+  // RAND() spinner state
+  const [randPhoto, setRandPhoto] = useState<Photo | null>(null);
+  const [randNodesAccessed, setRandNodesAccessed] = useState(0);
+  const [randIsSpinning, setRandIsSpinning] = useState(false);
+  const [randStatusText, setRandStatusText] = useState('> AWAITING INPUT...');
+  const lastRandPhotoRef = useRef<string | null>(null);
+
   const { displayedText, isComplete } = useTypingEffect('> SYSTEM INITIALIZED', 80);
   const { ping, cpu, mem } = useLiveStats();
   const chopinAudio = useRef<HTMLAudioElement | null>(null);
   const funeralAudio = useRef<HTMLAudioElement | null>(null);
+  const carFireVideoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     chopinAudio.current = new Audio('/audio/chopin.mp3');
@@ -337,17 +336,47 @@ export default function SpotlightDashboard() {
     return null;
   };
 
-  const handleFactHover = (fact: string) => {
+  const handleFactHover = (fact: string, index: number) => {
+    setRevealedFacts(prev => new Set(prev).add(index));
+
+    if (fact.toLowerCase().includes('car on fire') || fact.toLowerCase().includes('set my car')) {
+      setShowCarFireVideo(true);
+      setTimeout(() => {
+        if (carFireVideoRef.current) {
+          carFireVideoRef.current.playbackRate = 2;
+          carFireVideoRef.current.play().catch(() => {});
+        }
+      }, 0);
+      return;
+    }
     const audio = getAudioForFact(fact);
     audio?.play().catch(() => {});
   };
 
-  const handleFactLeave = (fact: string) => {
+  const handleFactLeave = (fact: string, index: number) => {
+    setRevealedFacts(prev => {
+      const next = new Set(prev);
+      next.delete(index);
+      return next;
+    });
+
+    if (fact.toLowerCase().includes('car on fire') || fact.toLowerCase().includes('set my car')) {
+      setShowCarFireVideo(false);
+      if (carFireVideoRef.current) {
+        carFireVideoRef.current.pause();
+        carFireVideoRef.current.currentTime = 0;
+      }
+      return;
+    }
     const audio = getAudioForFact(fact);
     if (audio) {
       audio.pause();
       audio.currentTime = 0;
     }
+  };
+
+  const getRedactedText = (text: string): string => {
+    return text.replace(/[a-zA-Z0-9]/g, '█');
   };
 
   const openLightbox = (photos: Photo[], index: number) => {
@@ -388,6 +417,47 @@ export default function SpotlightDashboard() {
 
   const closeModal = () => {
     setSelectedCard(null);
+    // Reset RAND() state when closing
+    setRandPhoto(null);
+    setRandNodesAccessed(0);
+    setRandStatusText('> AWAITING INPUT...');
+  };
+
+  const executeRand = () => {
+    if (randIsSpinning || randomMemoryPhotos.length === 0) return;
+
+    setRandIsSpinning(true);
+    setRandStatusText('> ACCESSING MEMORY NODE...');
+
+    // Glitch animation - rapidly cycle through photos
+    let cycles = 0;
+    const maxCycles = 15;
+    const cycleInterval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * randomMemoryPhotos.length);
+      setRandPhoto(randomMemoryPhotos[randomIndex]);
+      cycles++;
+
+      if (cycles >= maxCycles) {
+        clearInterval(cycleInterval);
+
+        // Pick final photo (avoid repeat)
+        let finalPhoto: Photo;
+        if (randomMemoryPhotos.length === 1) {
+          finalPhoto = randomMemoryPhotos[0];
+        } else {
+          const availablePhotos = randomMemoryPhotos.filter(
+            p => p.src !== lastRandPhotoRef.current
+          );
+          finalPhoto = availablePhotos[Math.floor(Math.random() * availablePhotos.length)];
+        }
+
+        setRandPhoto(finalPhoto);
+        lastRandPhotoRef.current = finalPhoto.src;
+        setRandNodesAccessed(prev => prev + 1);
+        setRandStatusText('> MEMORY DECRYPTED');
+        setRandIsSpinning(false);
+      }
+    }, 80);
   };
 
   return (
@@ -404,7 +474,7 @@ export default function SpotlightDashboard() {
       />
 
       {/* CRT Flicker */}
-      <div className="fixed inset-0 pointer-events-none z-10 animate-pulse opacity-[0.02] bg-green-500" />
+      <div className="fixed inset-0 pointer-events-none z-10 animate-crt-flicker bg-green-500" />
 
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-10 relative z-20">
@@ -486,8 +556,8 @@ export default function SpotlightDashboard() {
             <p className="text-green-700 text-xs uppercase tracking-wider">giant_dog</p>
           </div>
           <div className="border border-green-500/30 p-4 rounded bg-black/50">
-            <p className="text-green-400 text-2xl font-bold font-mono">001</p>
-            <p className="text-green-700 text-xs uppercase tracking-wider">cars_ignited</p>
+            <p className="text-green-400 text-2xl font-bold font-mono">022</p>
+            <p className="text-green-700 text-xs uppercase tracking-wider">indoor_plants</p>
           </div>
           <div className="border border-green-500/30 p-4 rounded bg-black/50">
             <p className="text-green-400 text-2xl font-bold font-mono">INF</p>
@@ -526,92 +596,210 @@ export default function SpotlightDashboard() {
             </div>
 
             <div className="p-6 font-mono">
-              {/* Terminal output style */}
-              <div className="text-green-600 text-sm mb-4">
-                {'>'} cat /data/{selectedCard.title.toLowerCase()}.log
-              </div>
-
-              {/* Photo Gallery with Pagination */}
-              {selectedCard.content.photos.length > 0 ? (
-                (() => {
-                  const PHOTOS_PER_PAGE = 4;
-                  const photos = selectedCard.content.photos;
-                  const totalPages = Math.ceil(photos.length / PHOTOS_PER_PAGE);
-                  const currentPhotos = photos.slice(
-                    photoPage * PHOTOS_PER_PAGE,
-                    (photoPage + 1) * PHOTOS_PER_PAGE
-                  );
-
-                  return (
-                    <div className="mb-4">
-                      {/* Simple 2x2 Grid */}
-                      <div className="grid grid-cols-2 gap-3">
-                        {currentPhotos.map((photo, index) => (
-                          <button
-                            key={index}
-                            onClick={() => openLightbox(photos, photoPage * PHOTOS_PER_PAGE + index)}
-                            className="aspect-[4/3] rounded overflow-hidden border border-green-500/50 hover:border-green-400 transition-colors"
-                          >
-                            <Image
-                              src={photo.src}
-                              alt={photo.alt || selectedCard.content.headline}
-                              width={600}
-                              height={450}
-                              className="w-full h-full object-cover"
-                            />
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Pagination Controls */}
-                      {photos.length > PHOTOS_PER_PAGE && (
-                        <div className="flex justify-center items-center gap-4 mt-3">
-                          <button
-                            onClick={() => setPhotoPage(p => p - 1)}
-                            disabled={photoPage === 0}
-                            className="p-2 text-green-400 hover:text-green-300 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
-                          >
-                            <ChevronLeft className="w-6 h-6" />
-                          </button>
-                          <span className="text-green-400 text-sm font-mono">
-                            [{photoPage + 1}/{totalPages}]
-                          </span>
-                          <button
-                            onClick={() => setPhotoPage(p => p + 1)}
-                            disabled={photoPage >= totalPages - 1}
-                            className="p-2 text-green-400 hover:text-green-300 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
-                          >
-                            <ChevronRight className="w-6 h-6" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()
-              ) : (
-                <div className="w-full h-48 rounded border-2 border-dashed border-green-500/30 mb-6 flex items-center justify-center bg-green-500/5">
-                  <p className="text-green-700 font-mono">{'>'} NO_IMAGE_DATA_FOUND</p>
-                </div>
-              )}
-
-              {/* Facts as terminal output */}
-              <div className="space-y-2">
-                {selectedCard.content.facts.map((fact, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2 cursor-default"
-                    onMouseEnter={() => handleFactHover(fact)}
-                    onMouseLeave={() => handleFactLeave(fact)}
-                  >
-                    <span className="text-green-600 flex-shrink-0">[{String(i + 1).padStart(2, '0')}]</span>
-                    <span className="text-green-400">{fact}</span>
+              {/* Hobbies Card - Icon Grid */}
+              {selectedCard.title === 'Hobbies' ? (
+                <div>
+                  <div className="text-green-600 text-sm mb-6">
+                    {'>'} loading recreation_protocols...
                   </div>
-                ))}
-              </div>
 
-              <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
-                {'>'} EOF reached. Press [ESC] or click outside to close.
-              </div>
+                  {/* Icon Grid */}
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mb-6">
+                    {[
+                      { icon: Dumbbell, label: 'Weight Lifting' },
+                      { icon: Bike, label: 'Biking' },
+                      { icon: Snowflake, label: 'Skiing' },
+                      { icon: Snowflake, label: 'Snowboarding' },
+                      { icon: Mountain, label: 'Hiking' },
+                      { icon: Flower2, label: 'Gardening' },
+                      { icon: Footprints, label: 'Walks' },
+                      { icon: Gamepad2, label: 'Wild Rift' },
+                      { icon: Heart, label: 'Tennis' },
+                      { icon: Baby, label: 'Parenting' },
+                    ].map((hobby, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col items-center gap-2 p-3 border border-green-500/30 rounded bg-green-500/5 hover:bg-green-500/10 hover:border-green-400 transition-colors"
+                      >
+                        <hobby.icon size={28} className="text-green-400" />
+                        <span className="text-green-500 text-xs text-center">{hobby.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Dr. Mundo Achievement Callout */}
+                  <div className="border-2 border-yellow-500/50 bg-yellow-500/5 rounded-lg p-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <Trophy size={32} className="text-yellow-400" />
+                      <div>
+                        <p className="text-yellow-400 font-bold">TOP 100 DR. MUNDO</p>
+                        <p className="text-yellow-600 text-sm">Wild Rift NA Server</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
+                    {'>'} EOF reached. Press [ESC] or click outside to close.
+                  </div>
+                </div>
+              ) : selectedCard.title === 'RAND()' ? (
+                <div className="flex flex-col items-center">
+                  {/* Status Text */}
+                  <div className="text-green-600 text-sm mb-4 w-full">
+                    {randStatusText}
+                    {randIsSpinning && <span className="animate-pulse">_</span>}
+                  </div>
+
+                  {/* Photo Display Area */}
+                  <div className="relative w-full max-w-md aspect-[4/3] mb-6">
+                    {/* Scanline overlay during spin */}
+                    {randIsSpinning && (
+                      <div
+                        className="absolute inset-0 z-10 pointer-events-none"
+                        style={{
+                          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.1) 2px, rgba(0, 255, 0, 0.1) 4px)',
+                        }}
+                      />
+                    )}
+
+                    {/* Photo or Placeholder */}
+                    {randPhoto ? (
+                      <div className={`w-full h-full rounded border-2 border-green-500 overflow-hidden ${randIsSpinning ? 'opacity-70' : ''}`}>
+                        <Image
+                          src={randPhoto.src}
+                          alt={randPhoto.alt || 'Random memory'}
+                          width={600}
+                          height={450}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-full rounded border-2 border-dashed border-green-500/30 flex items-center justify-center bg-green-500/5">
+                        <div className="text-center">
+                          <Dices size={48} className="text-green-700 mx-auto mb-2" />
+                          <p className="text-green-700">{'>'} READY TO ACCESS</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Glitch overlay during spin */}
+                    {randIsSpinning && (
+                      <div className="absolute inset-0 bg-green-500/10 animate-pulse pointer-events-none rounded" />
+                    )}
+                  </div>
+
+                  {/* Execute Button */}
+                  <button
+                    onClick={executeRand}
+                    disabled={randIsSpinning || randomMemoryPhotos.length === 0}
+                    className={`
+                      px-6 py-3 rounded border-2 border-green-500
+                      text-green-400 font-mono font-bold
+                      transition-all duration-200
+                      ${randIsSpinning
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-green-500/20 hover:shadow-[0_0_20px_rgba(0,255,0,0.3)] active:scale-95'
+                      }
+                    `}
+                  >
+                    {randIsSpinning ? '> PROCESSING...' : '> EXECUTE rand()'}
+                  </button>
+
+                  {/* Nodes Accessed Counter */}
+                  <div className="mt-6 pt-4 border-t border-green-500/30 w-full text-center">
+                    <span className="text-green-700 text-sm">
+                      [NODES_ACCESSED: <span className="text-green-400">{String(randNodesAccessed).padStart(3, '0')}</span>]
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Terminal output style */}
+                  <div className="text-green-600 text-sm mb-4">
+                    {'>'} cat /data/{selectedCard.title.toLowerCase()}.log
+                  </div>
+
+                  {/* Photo Gallery with Pagination */}
+                  {selectedCard.content.photos.length > 0 ? (
+                    (() => {
+                      const PHOTOS_PER_PAGE = 4;
+                      const photos = selectedCard.content.photos;
+                      const totalPages = Math.ceil(photos.length / PHOTOS_PER_PAGE);
+                      const currentPhotos = photos.slice(
+                        photoPage * PHOTOS_PER_PAGE,
+                        (photoPage + 1) * PHOTOS_PER_PAGE
+                      );
+
+                      return (
+                        <div className="mb-4">
+                          {/* Simple 2x2 Grid */}
+                          <div className="grid grid-cols-2 gap-3">
+                            {currentPhotos.map((photo, index) => (
+                              <button
+                                key={index}
+                                onClick={() => openLightbox(photos, photoPage * PHOTOS_PER_PAGE + index)}
+                                className="aspect-[4/3] rounded overflow-hidden border border-green-500/50 hover:border-green-400 transition-colors"
+                              >
+                                <Image
+                                  src={photo.src}
+                                  alt={photo.alt || selectedCard.content.headline}
+                                  width={600}
+                                  height={450}
+                                  className="w-full h-full object-cover"
+                                />
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Pagination Controls */}
+                          {photos.length > PHOTOS_PER_PAGE && (
+                            <div className="flex justify-center items-center gap-4 mt-3">
+                              <button
+                                onClick={() => setPhotoPage(p => p - 1)}
+                                disabled={photoPage === 0}
+                                className="p-2 text-green-400 hover:text-green-300 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                              >
+                                <ChevronLeft className="w-6 h-6" />
+                              </button>
+                              <span className="text-green-400 text-sm font-mono">
+                                [{photoPage + 1}/{totalPages}]
+                              </span>
+                              <button
+                                onClick={() => setPhotoPage(p => p + 1)}
+                                disabled={photoPage >= totalPages - 1}
+                                className="p-2 text-green-400 hover:text-green-300 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                              >
+                                <ChevronRight className="w-6 h-6" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <div className="w-full h-48 rounded border-2 border-dashed border-green-500/30 mb-6 flex items-center justify-center bg-green-500/5">
+                      <p className="text-green-700 font-mono">{'>'} NO_IMAGE_DATA_FOUND</p>
+                    </div>
+                  )}
+
+                  {/* Facts as terminal output */}
+                  <div className="space-y-3">
+                    {selectedCard.content.facts.map((fact, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2"
+                      >
+                        <span className="text-green-600 flex-shrink-0">[{String(i + 1).padStart(2, '0')}]</span>
+                        <span className="text-green-400">{fact}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
+                    {'>'} EOF reached. Press [ESC] or click outside to close.
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -668,6 +856,19 @@ export default function SpotlightDashboard() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Car Fire Video Popup */}
+      {showCarFireVideo && (
+        <div className="fixed bottom-8 right-8 z-[70] border-2 border-green-500 rounded-lg overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.4)]">
+          <video
+            ref={carFireVideoRef}
+            src="/video/carfire.mp4"
+            muted
+            loop
+            className="w-80 h-auto"
+          />
         </div>
       )}
     </div>

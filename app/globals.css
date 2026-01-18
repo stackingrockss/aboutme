@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+@keyframes crt-flicker {
+  0%, 100% { opacity: 0.005; }
+  50% { opacity: 0.015; }
+}
+
+.animate-crt-flicker {
+  animation: crt-flicker 4s ease-in-out infinite;
+}
