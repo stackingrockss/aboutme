@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Users, MapPin, Globe } from 'lucide-react';
 
-// Sample family data - you'd replace with real data
+// Family data
 const familyMembers = [
-  { id: 1, name: 'Dad', codename: 'ARCHITECT', role: 'sysadmin', status: 'active', location: 'Home Base', photo: '/images/family-pic.jpg' },
-  { id: 2, name: 'Mom', codename: 'ORACLE', role: 'root', status: 'active', location: 'Home Base', photo: '/images/family-pic.jpg' },
-  { id: 3, name: 'Brother', codename: 'CIPHER', role: 'contributor', status: 'away', location: 'Remote', photo: '/images/family-pic.jpg' },
-  { id: 4, name: 'Tiffany', codename: 'TRINITY', role: 'partner', status: 'active', location: 'Home Base', photo: '/images/matt-and-tiffany.jpg' },
+  { id: 1, name: 'Tiffany', codename: 'TRINITY', role: 'co-admin', status: 'active', location: 'Home Base', age: null },
+  { id: 2, name: 'Daniel', codename: 'CHAOS_AGENT', role: 'dev_ops', status: 'active', location: 'Home Base', age: 9 },
+  { id: 3, name: 'Emilia', codename: 'SCHEDULER', role: 'sys_organizer', status: 'active', location: 'Home Base', age: 6 },
+  { id: 4, name: 'Natalie', codename: 'WILDCARD', role: 'chaos_engine', status: 'active', location: 'Home Base', age: 4 },
 ];
 
 // ============================================
@@ -314,11 +314,53 @@ function MatrixRainRevealMockup() {
 // ============================================
 // 9. HYBRID - Matrix Reveal + Character Select
 // ============================================
-const familyStats: Record<string, { support: number; humor: number; wisdom: number; specialty: string }> = {
-  'ARCHITECT': { support: 95, humor: 70, wisdom: 90, specialty: 'Problem Solving' },
-  'ORACLE': { support: 100, humor: 75, wisdom: 95, specialty: 'Life Guidance' },
-  'CIPHER': { support: 80, humor: 90, wisdom: 70, specialty: 'Comic Relief' },
-  'TRINITY': { support: 100, humor: 85, wisdom: 88, specialty: 'Best Teammate' },
+type FamilyStats = {
+  stats: { label: string; value: number }[];
+  specialty: string;
+  note?: string;
+};
+
+const familyStats: Record<string, FamilyStats> = {
+  'TRINITY': {
+    stats: [
+      { label: 'PATIENCE', value: 100 },
+      { label: 'SUPPORT', value: 100 },
+      { label: 'PARENTING', value: 99 },
+      { label: 'HUMOR', value: 90 },
+    ],
+    specialty: 'Expert Parent',
+    note: 'Godlike patience detected',
+  },
+  'CHAOS_AGENT': {
+    stats: [
+      { label: 'TECH_SKILL', value: 92 },
+      { label: 'HUMOR', value: 95 },
+      { label: 'CHAOS_GEN', value: 88 },
+      { label: 'SIBLING_TEASE', value: 94 },
+    ],
+    specialty: 'Tech Prodigy',
+    note: 'Primary instigator protocols',
+  },
+  'SCHEDULER': {
+    stats: [
+      { label: 'ORGANIZATION', value: 97 },
+      { label: 'SWEETNESS', value: 100 },
+      { label: 'ACTIVITY_LVL', value: 95 },
+      { label: 'PATIENCE', value: 85 },
+    ],
+    specialty: 'Multi-Activity Athlete',
+    note: 'Sports, cheer, everything.exe',
+  },
+  'WILDCARD': {
+    stats: [
+      { label: 'CHAOS', value: 110 },
+      { label: 'ADVENTURE', value: 100 },
+      { label: 'HUMOR', value: 95 },
+      { label: 'LOGIC', value: 15 },
+    ],
+    specialty: 'Chaos Engine',
+    note: 'WARNING: Irrational subroutines',
+  },
 };
 
 function HybridMatrixSelectMockup() {
@@ -417,28 +459,45 @@ function HybridMatrixSelectMockup() {
               <span className="text-cyan-400">{stats.specialty}</span>
             </div>
 
+            {/* Age if available */}
+            {selectedMember.age && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-green-600 w-20">AGE:</span>
+                <span className="text-green-400">{selectedMember.age} cycles</span>
+              </div>
+            )}
+
             {/* Divider */}
             <div className="border-t border-green-500/30 my-2" />
 
-            {/* Stats Bars */}
+            {/* Stats Bars - now dynamic per person */}
             <div className="space-y-2">
-              {[
-                { label: 'SUPPORT', value: stats.support },
-                { label: 'HUMOR', value: stats.humor },
-                { label: 'WISDOM', value: stats.wisdom },
-              ].map((stat) => (
+              {stats.stats.map((stat) => (
                 <div key={stat.label} className="flex items-center gap-3">
-                  <span className="text-green-600 text-xs w-16">{stat.label}</span>
+                  <span className="text-green-600 text-xs w-20">{stat.label}</span>
                   <div className="flex-1 h-2 bg-green-900/50 rounded overflow-hidden">
                     <div
-                      className="h-full bg-green-400 rounded transition-all duration-700 ease-out"
-                      style={{ width: animatedBars ? `${stat.value}%` : '0%' }}
+                      className={`h-full rounded transition-all duration-700 ease-out ${
+                        stat.value > 100 ? 'bg-red-400' : stat.value < 30 ? 'bg-yellow-500' : 'bg-green-400'
+                      }`}
+                      style={{ width: animatedBars ? `${Math.min(stat.value, 100)}%` : '0%' }}
                     />
                   </div>
-                  <span className="text-green-400 text-xs w-8 text-right">{stat.value}</span>
+                  <span className={`text-xs w-10 text-right ${
+                    stat.value > 100 ? 'text-red-400' : stat.value < 30 ? 'text-yellow-500' : 'text-green-400'
+                  }`}>
+                    {stat.value}{stat.value > 100 ? '!' : ''}
+                  </span>
                 </div>
               ))}
             </div>
+
+            {/* Note if available */}
+            {stats.note && (
+              <div className="mt-3 pt-3 border-t border-green-500/30">
+                <span className="text-cyan-600 text-xs">{'>'} {stats.note}</span>
+              </div>
+            )}
 
             {/* Status */}
             <div className="mt-3 pt-3 border-t border-green-500/30 flex items-center justify-between">
