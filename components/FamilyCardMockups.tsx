@@ -312,6 +312,160 @@ function MatrixRainRevealMockup() {
 }
 
 // ============================================
+// 9. HYBRID - Matrix Reveal + Character Select
+// ============================================
+const familyStats: Record<string, { support: number; humor: number; wisdom: number; specialty: string }> = {
+  'ARCHITECT': { support: 95, humor: 70, wisdom: 90, specialty: 'Problem Solving' },
+  'ORACLE': { support: 100, humor: 75, wisdom: 95, specialty: 'Life Guidance' },
+  'CIPHER': { support: 80, humor: 90, wisdom: 70, specialty: 'Comic Relief' },
+  'TRINITY': { support: 100, humor: 85, wisdom: 88, specialty: 'Best Teammate' },
+};
+
+function HybridMatrixSelectMockup() {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [animatedBars, setAnimatedBars] = useState(false);
+
+  // Animate bars when selection changes
+  useEffect(() => {
+    if (selectedIndex !== null) {
+      setAnimatedBars(false);
+      const timer = setTimeout(() => setAnimatedBars(true), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedIndex]);
+
+  const selectedMember = selectedIndex !== null ? familyMembers[selectedIndex] : null;
+  const stats = selectedMember ? familyStats[selectedMember.codename] : null;
+
+  return (
+    <div className="border border-green-500/50 rounded-lg p-4 bg-black">
+      <div className="text-green-400 text-center text-lg font-bold mb-4">
+        {'>'} DECRYPT OPERATIVE {'<'}
+      </div>
+
+      {/* Character Grid with Matrix Reveal */}
+      <div className="grid grid-cols-4 gap-3 mb-4">
+        {familyMembers.map((member, i) => (
+          <button
+            key={member.id}
+            onClick={() => setSelectedIndex(selectedIndex === i ? null : i)}
+            className={`
+              relative aspect-square rounded border-2 overflow-hidden transition-all duration-300
+              ${selectedIndex === i
+                ? 'border-green-400 scale-105 shadow-[0_0_20px_rgba(0,255,0,0.5)]'
+                : 'border-green-500/30 hover:border-green-500/50'
+              }
+            `}
+          >
+            {/* Revealed content underneath */}
+            <div className="absolute inset-0 bg-green-900/30 flex flex-col items-center justify-center">
+              <Users size={28} className="text-green-400 mb-1" />
+              <span className="text-green-400 text-xs font-bold">{member.codename}</span>
+              <span className="text-green-600 text-xs">"{member.name}"</span>
+            </div>
+
+            {/* Matrix rain overlay - fades on select */}
+            <div
+              className={`absolute inset-0 bg-black flex items-center justify-center transition-opacity duration-500 ${
+                selectedIndex === i ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}
+            >
+              <div className="text-green-500 font-mono text-xs leading-tight overflow-hidden">
+                {Array(6).fill(0).map((_, row) => (
+                  <div key={row} className="flex justify-center">
+                    {Array(8).fill(0).map((_, col) => (
+                      <span key={col} style={{ opacity: Math.random() * 0.8 + 0.2 }}>
+                        {String.fromCharCode(0x30A0 + Math.random() * 96)}
+                      </span>
+                    ))}
+                  </div>
+                ))}
+              </div>
+              <div className="absolute bottom-1 left-0 right-0 text-center">
+                <span className="text-green-700 text-xs">[ENCRYPTED]</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Stats Panel - shows when someone is selected */}
+      <div className={`
+        border border-green-500/30 rounded-lg overflow-hidden transition-all duration-300
+        ${selectedMember ? 'opacity-100 max-h-96' : 'opacity-50 max-h-20'}
+      `}>
+        <div className="bg-green-500/10 border-b border-green-500/30 px-4 py-2 flex items-center justify-between">
+          <span className="text-green-400 font-bold">
+            {selectedMember ? `${selectedMember.codename} // ${selectedMember.name}` : 'SELECT OPERATIVE'}
+          </span>
+          {selectedMember && (
+            <span className="text-green-500 text-xs animate-pulse">● DECRYPTED</span>
+          )}
+        </div>
+
+        {selectedMember && stats && (
+          <div className="p-4 space-y-3">
+            {/* Role */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-green-600 w-20">ROLE:</span>
+              <span className="text-green-400">{selectedMember.role.toUpperCase()}</span>
+            </div>
+
+            {/* Specialty */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-green-600 w-20">SPECIALTY:</span>
+              <span className="text-cyan-400">{stats.specialty}</span>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-green-500/30 my-2" />
+
+            {/* Stats Bars */}
+            <div className="space-y-2">
+              {[
+                { label: 'SUPPORT', value: stats.support },
+                { label: 'HUMOR', value: stats.humor },
+                { label: 'WISDOM', value: stats.wisdom },
+              ].map((stat) => (
+                <div key={stat.label} className="flex items-center gap-3">
+                  <span className="text-green-600 text-xs w-16">{stat.label}</span>
+                  <div className="flex-1 h-2 bg-green-900/50 rounded overflow-hidden">
+                    <div
+                      className="h-full bg-green-400 rounded transition-all duration-700 ease-out"
+                      style={{ width: animatedBars ? `${stat.value}%` : '0%' }}
+                    />
+                  </div>
+                  <span className="text-green-400 text-xs w-8 text-right">{stat.value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Status */}
+            <div className="mt-3 pt-3 border-t border-green-500/30 flex items-center justify-between">
+              <span className="text-green-600 text-xs">STATUS:</span>
+              <span className={`text-xs flex items-center gap-1 ${
+                selectedMember.status === 'active' ? 'text-green-400' : 'text-yellow-500'
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${
+                  selectedMember.status === 'active' ? 'bg-green-400 animate-pulse' : 'bg-yellow-500'
+                }`} />
+                {selectedMember.status.toUpperCase()}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!selectedMember && (
+          <div className="p-4 text-center text-green-700 text-sm">
+            {'>'} Click an operative to decrypt their file...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================
 // 7. AGENTS IN THE FIELD - Map View
 // ============================================
 function AgentsMapMockup() {
@@ -431,6 +585,7 @@ export default function FamilyCardMockups() {
     { name: '6. Matrix Reveal', component: MatrixRainRevealMockup, description: 'Matrix rain parts on hover to reveal photos' },
     { name: '7. Agents Map', component: AgentsMapMockup, description: 'World map with location pins' },
     { name: '8. System Users', component: SystemUsersMockup, description: 'Linux user management style' },
+    { name: '9. Hybrid ★', component: HybridMatrixSelectMockup, description: 'Matrix reveal + character stats combined - click to decrypt & view stats' },
   ];
 
   const ActiveComponent = mockups[activeTab].component;
