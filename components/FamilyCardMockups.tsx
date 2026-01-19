@@ -56,21 +56,23 @@ const dossierLines = [
 ];
 
 function TerminalDossiersMockup() {
-  const [typedLines, setTypedLines] = useState<string[]>([]);
+  const [lineIndex, setLineIndex] = useState(0);
 
   useEffect(() => {
-    setTypedLines([]);
-    let i = 0;
+    setLineIndex(0);
     const timer = setInterval(() => {
-      if (i < dossierLines.length) {
-        setTypedLines(prev => [...prev, dossierLines[i]]);
-        i++;
-      } else {
+      setLineIndex(prev => {
+        if (prev < dossierLines.length) {
+          return prev + 1;
+        }
         clearInterval(timer);
-      }
+        return prev;
+      });
     }, 400);
     return () => clearInterval(timer);
   }, []);
+
+  const typedLines = dossierLines.slice(0, lineIndex);
 
   return (
     <div className="border border-green-500/50 rounded-lg p-4 bg-black font-mono">
