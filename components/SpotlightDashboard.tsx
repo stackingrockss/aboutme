@@ -2052,6 +2052,7 @@ export default function SpotlightDashboard() {
                           fill
                           sizes="(max-width: 768px) 100vw, 600px"
                           className="object-cover"
+                          unoptimized
                         />
                       </div>
                     ) : (
