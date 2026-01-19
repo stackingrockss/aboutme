@@ -670,11 +670,11 @@ function FamilyFlow({ photos, openLightbox }: { photos: Photo[]; openLightbox: (
               />
               {/* Overlay with name */}
               <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-1 text-center">
-                <span className="text-green-400 text-xs font-bold">{member.codename}</span>
+                <span className="text-green-400 text-xs font-bold">{member.name}</span>
               </div>
             </div>
 
-            {/* Matrix rain overlay - fades on select */}
+            {/* Matrix rain overlay - fades on click */}
             <div
               className={`absolute inset-0 bg-black flex items-center justify-center transition-opacity duration-500 ${
                 selectedIndex === i ? 'opacity-0 pointer-events-none' : 'opacity-100'
