@@ -325,7 +325,7 @@ const familyStats: Record<string, FamilyStats> = {
     stats: [
       { label: 'PATIENCE', value: 100 },
       { label: 'SUPPORT', value: 100 },
-      { label: 'PARENTING', value: 99 },
+      { label: 'PARENTING', value: 110 },
       { label: 'HUMOR', value: 90 },
     ],
     specialty: 'Expert Parent',
