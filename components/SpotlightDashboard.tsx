@@ -338,6 +338,9 @@ function FlickerText({ children, isFlickering }: { children: string; isFlickerin
 function BeastCreatureFile({ photos, openLightbox }: { photos: Photo[]; openLightbox: (photos: Photo[], index: number) => void }) {
   const [mode, setMode] = useState<'family' | 'stranger'>('family');
   const [animatedBars, setAnimatedBars] = useState(false);
+  const [photoPage, setPhotoPage] = useState(0);
+  const photosPerPage = 4;
+  const totalPages = Math.ceil(photos.length / photosPerPage);
 
   useEffect(() => {
     // Trigger bar animation after mount
@@ -520,12 +523,41 @@ function BeastCreatureFile({ photos, openLightbox }: { photos: Photo[]; openLigh
       {/* Photo Gallery */}
       {photos.length > 0 && (
         <div className="mt-6">
-          <div className="text-green-600 text-sm mb-3">{'>'} SPECIMEN_IMAGERY:</div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-green-600 text-sm">{'>'} SPECIMEN_IMAGERY:</div>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPhotoPage(p => Math.max(0, p - 1))}
+                  disabled={photoPage === 0}
+                  className={`px-2 py-1 text-xs border rounded transition-colors ${
+                    photoPage === 0
+                      ? 'border-green-500/20 text-green-700/50 cursor-not-allowed'
+                      : 'border-green-500/50 text-green-400 hover:bg-green-500/20'
+                  }`}
+                >
+                  {'<'} PREV
+                </button>
+                <span className="text-green-600 text-xs font-mono">[{photoPage + 1}/{totalPages}]</span>
+                <button
+                  onClick={() => setPhotoPage(p => Math.min(totalPages - 1, p + 1))}
+                  disabled={photoPage === totalPages - 1}
+                  className={`px-2 py-1 text-xs border rounded transition-colors ${
+                    photoPage === totalPages - 1
+                      ? 'border-green-500/20 text-green-700/50 cursor-not-allowed'
+                      : 'border-green-500/50 text-green-400 hover:bg-green-500/20'
+                  }`}
+                >
+                  NEXT {'>'}
+                </button>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-4 gap-2">
-            {photos.slice(0, 4).map((photo, index) => (
+            {photos.slice(photoPage * photosPerPage, (photoPage + 1) * photosPerPage).map((photo, index) => (
               <button
-                key={index}
-                onClick={() => openLightbox(photos, index)}
+                key={photoPage * photosPerPage + index}
+                onClick={() => openLightbox(photos, photoPage * photosPerPage + index)}
                 className="aspect-square rounded overflow-hidden border border-green-500/50 hover:border-green-400 transition-colors"
               >
                 <Image
@@ -538,11 +570,6 @@ function BeastCreatureFile({ photos, openLightbox }: { photos: Photo[]; openLigh
               </button>
             ))}
           </div>
-          {photos.length > 4 && (
-            <div className="text-center mt-2">
-              <span className="text-green-700 text-xs">[+{photos.length - 4} more in lightbox]</span>
-            </div>
-          )}
         </div>
       )}
 
@@ -1335,7 +1362,7 @@ export default function SpotlightDashboard() {
   const [randNodesAccessed, setRandNodesAccessed] = useState(0);
   const [randIsSpinning, setRandIsSpinning] = useState(false);
   const [randStatusText, setRandStatusText] = useState('> AWAITING INPUT...');
-  const lastRandPhotoRef = useRef<string | null>(null);
+  const shownRandPhotosRef = useRef<Set<string>>(new Set());
 
   // Projects card animation state
   const [projectsBuildPhase, setProjectsBuildPhase] = useState<'building' | 'typing' | 'done'>('building');
@@ -1572,19 +1599,20 @@ export default function SpotlightDashboard() {
       if (cycles >= maxCycles) {
         clearInterval(cycleInterval);
 
-        // Pick final photo (avoid repeat)
-        let finalPhoto: Photo;
-        if (randomMemoryPhotos.length === 1) {
-          finalPhoto = randomMemoryPhotos[0];
-        } else {
-          const availablePhotos = randomMemoryPhotos.filter(
-            p => p.src !== lastRandPhotoRef.current
-          );
-          finalPhoto = availablePhotos[Math.floor(Math.random() * availablePhotos.length)];
+        // Pick final photo from unshown photos, reset if all have been shown
+        let availablePhotos = randomMemoryPhotos.filter(
+          p => !shownRandPhotosRef.current.has(p.src)
+        );
+
+        // If all photos have been shown, reset the tracking
+        if (availablePhotos.length === 0) {
+          shownRandPhotosRef.current.clear();
+          availablePhotos = randomMemoryPhotos;
         }
 
+        const finalPhoto = availablePhotos[Math.floor(Math.random() * availablePhotos.length)];
         setRandPhoto(finalPhoto);
-        lastRandPhotoRef.current = finalPhoto.src;
+        shownRandPhotosRef.current.add(finalPhoto.src);
         setRandNodesAccessed(prev => prev + 1);
         setRandStatusText('> MEMORY DECRYPTED');
         setRandIsSpinning(false);
