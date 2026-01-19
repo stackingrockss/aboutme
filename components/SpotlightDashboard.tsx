@@ -774,12 +774,221 @@ const buildLogMessages = [
   '> Loading project manifests...',
 ];
 
+// Matrix Shutdown Sequence Component
+function MatrixShutdown({ onReset }: { onReset: () => void }) {
+  const [phase, setPhase] = useState<'glitch' | 'rain' | 'overload' | 'dissolve' | 'blackout' | 'message'>('glitch');
+  const [glitchIntensity, setGlitchIntensity] = useState(0);
+  const [messageOpacity, setMessageOpacity] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Phase transitions
+  useEffect(() => {
+    const timers: NodeJS.Timeout[] = [];
+
+    // Glitch phase - intensify over 2s
+    const glitchInterval = setInterval(() => {
+      setGlitchIntensity(prev => Math.min(prev + 0.1, 1));
+    }, 100);
+    timers.push(glitchInterval as unknown as NodeJS.Timeout);
+
+    // Move to rain phase after 2s
+    timers.push(setTimeout(() => setPhase('rain'), 2000));
+    // Move to overload phase after 4s
+    timers.push(setTimeout(() => setPhase('overload'), 4000));
+    // Move to dissolve phase after 5.5s
+    timers.push(setTimeout(() => setPhase('dissolve'), 5500));
+    // Move to blackout phase after 7s
+    timers.push(setTimeout(() => setPhase('blackout'), 7000));
+    // Move to message phase after 8s
+    timers.push(setTimeout(() => setPhase('message'), 8000));
+
+    return () => {
+      timers.forEach(t => clearTimeout(t));
+      clearInterval(glitchInterval);
+    };
+  }, []);
+
+  // Fade in message
+  useEffect(() => {
+    if (phase === 'message') {
+      const fadeIn = setInterval(() => {
+        setMessageOpacity(prev => Math.min(prev + 0.05, 1));
+      }, 50);
+      return () => clearInterval(fadeIn);
+    }
+  }, [phase]);
+
+  // Intense Matrix rain for rain/overload phases
+  useEffect(() => {
+    if (phase !== 'rain' && phase !== 'overload' && phase !== 'dissolve') return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const charArray = chars.split('');
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops: number[] = [];
+
+    for (let i = 0; i < columns; i++) {
+      drops[i] = Math.random() * -50;
+    }
+
+    const draw = () => {
+      // Darker trail for more visible rain
+      ctx.fillStyle = phase === 'dissolve' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.03)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = charArray[Math.floor(Math.random() * charArray.length)];
+        const brightness = phase === 'overload' ? 1 : 0.8;
+        ctx.fillStyle = `rgba(0, 255, 70, ${brightness})`;
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
+          drops[i] = 0;
+        }
+        drops[i] += phase === 'overload' ? 1.5 : 1;
+      }
+    };
+
+    const interval = setInterval(draw, phase === 'overload' ? 20 : 30);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  return (
+    <div className="fixed inset-0 z-[100] pointer-events-none">
+      {/* Glitch overlay */}
+      {(phase === 'glitch' || phase === 'rain' || phase === 'overload') && (
+        <div
+          className="absolute inset-0"
+          style={{
+            animation: 'glitchShake 0.1s infinite',
+            opacity: glitchIntensity,
+          }}
+        >
+          <div
+            className="absolute inset-0 bg-green-500"
+            style={{
+              mixBlendMode: 'overlay',
+              opacity: 0.1 + glitchIntensity * 0.2,
+              animation: 'glitchFlicker 0.15s infinite',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Matrix rain canvas */}
+      {(phase === 'rain' || phase === 'overload' || phase === 'dissolve') && (
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0"
+          style={{ opacity: phase === 'dissolve' ? 0.8 : 0.6 }}
+        />
+      )}
+
+      {/* System overload text */}
+      {phase === 'overload' && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="text-red-500 text-4xl md:text-6xl font-mono font-bold tracking-wider"
+            style={{
+              textShadow: '0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.5)',
+              animation: 'textGlitch 0.1s infinite',
+            }}
+          >
+            SYSTEM OVERLOAD
+          </div>
+        </div>
+      )}
+
+      {/* Blackout */}
+      {(phase === 'blackout' || phase === 'message') && (
+        <div className="absolute inset-0 bg-black" />
+      )}
+
+      {/* Final message */}
+      {phase === 'message' && (
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-auto cursor-pointer"
+          onClick={onReset}
+        >
+          <div
+            className="text-green-500 text-3xl md:text-5xl font-mono font-bold tracking-wide mb-8"
+            style={{
+              opacity: messageOpacity,
+              textShadow: '0 0 30px rgba(0, 255, 0, 0.8)',
+              animation: messageOpacity >= 1 ? 'subtleGlitch 3s infinite' : 'none',
+            }}
+          >
+            You&apos;ve seen too much...
+          </div>
+          <div
+            className="text-green-700 text-sm font-mono"
+            style={{ opacity: messageOpacity * 0.7 }}
+          >
+            {'>'} click anywhere to reinitialize_
+          </div>
+        </div>
+      )}
+
+      {/* Glitch animation styles */}
+      <style jsx>{`
+        @keyframes glitchShake {
+          0% { transform: translate(0); }
+          20% { transform: translate(-2px, 2px); }
+          40% { transform: translate(-2px, -2px); }
+          60% { transform: translate(2px, 2px); }
+          80% { transform: translate(2px, -2px); }
+          100% { transform: translate(0); }
+        }
+        @keyframes glitchFlicker {
+          0% { opacity: 0.1; }
+          50% { opacity: 0.3; }
+          100% { opacity: 0.1; }
+        }
+        @keyframes textGlitch {
+          0% { transform: translate(0) skew(0deg); }
+          20% { transform: translate(-3px, 3px) skew(2deg); }
+          40% { transform: translate(3px, -3px) skew(-2deg); }
+          60% { transform: translate(-3px, -3px) skew(2deg); }
+          80% { transform: translate(3px, 3px) skew(-2deg); }
+          100% { transform: translate(0) skew(0deg); }
+        }
+        @keyframes subtleGlitch {
+          0%, 90%, 100% { transform: translate(0); opacity: 1; }
+          92% { transform: translate(-2px, 1px); opacity: 0.8; }
+          94% { transform: translate(2px, -1px); opacity: 0.9; }
+          96% { transform: translate(-1px, 2px); opacity: 0.8; }
+          98% { transform: translate(1px, -2px); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+const OPENED_CARDS_KEY = 'spotlight_opened_cards';
+const SHUTDOWN_TRIGGERED_KEY = 'spotlight_shutdown_triggered';
+
 export default function SpotlightDashboard() {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [lightbox, setLightbox] = useState<{ photos: Photo[]; index: number } | null>(null);
   const [photoPage, setPhotoPage] = useState(0);
   const [showCarFireVideo, setShowCarFireVideo] = useState(false);
   const [revealedFacts, setRevealedFacts] = useState<Set<number>>(new Set());
+  const [openedCards, setOpenedCards] = useState<Set<number>>(new Set());
+  const [showShutdown, setShowShutdown] = useState(false);
+  const [headerClickCount, setHeaderClickCount] = useState(0);
+  const headerClickTimer = useRef<NodeJS.Timeout | null>(null);
 
   // RAND() spinner state
   const [randPhoto, setRandPhoto] = useState<Photo | null>(null);
@@ -800,6 +1009,60 @@ export default function SpotlightDashboard() {
   const chopinAudio = useRef<HTMLAudioElement | null>(null);
   const funeralAudio = useRef<HTMLAudioElement | null>(null);
   const carFireVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Load opened cards from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(OPENED_CARDS_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as number[];
+        setOpenedCards(new Set(parsed));
+      } catch {
+        // Invalid data, reset
+        localStorage.removeItem(OPENED_CARDS_KEY);
+      }
+    }
+    // Check if shutdown was already triggered
+    const shutdownTriggered = localStorage.getItem(SHUTDOWN_TRIGGERED_KEY);
+    if (shutdownTriggered === 'true') {
+      setShowShutdown(true);
+    }
+  }, []);
+
+  // Check if all cards opened and trigger shutdown
+  useEffect(() => {
+    if (openedCards.size === cards.length && cards.length > 0 && !showShutdown) {
+      // Mark shutdown as triggered in localStorage
+      localStorage.setItem(SHUTDOWN_TRIGGERED_KEY, 'true');
+      setShowShutdown(true);
+    }
+  }, [openedCards, showShutdown]);
+
+  // Reset function for triple-click and post-shutdown
+  const handleReset = () => {
+    localStorage.removeItem(OPENED_CARDS_KEY);
+    localStorage.removeItem(SHUTDOWN_TRIGGERED_KEY);
+    setOpenedCards(new Set());
+    setShowShutdown(false);
+  };
+
+  // Triple-click header to reset
+  const handleHeaderClick = () => {
+    setHeaderClickCount(prev => prev + 1);
+
+    if (headerClickTimer.current) {
+      clearTimeout(headerClickTimer.current);
+    }
+
+    headerClickTimer.current = setTimeout(() => {
+      setHeaderClickCount(0);
+    }, 500);
+
+    if (headerClickCount >= 2) {
+      handleReset();
+      setHeaderClickCount(0);
+    }
+  };
 
   useEffect(() => {
     chopinAudio.current = new Audio('/audio/chopin.mp3');
@@ -898,6 +1161,12 @@ export default function SpotlightDashboard() {
   const handleCardClick = (card: Card) => {
     setSelectedCard(card);
     setPhotoPage(0);
+
+    // Track opened card in localStorage
+    const newOpenedCards = new Set(openedCards);
+    newOpenedCards.add(card.id);
+    setOpenedCards(newOpenedCards);
+    localStorage.setItem(OPENED_CARDS_KEY, JSON.stringify(Array.from(newOpenedCards)));
   };
 
   const closeModal = () => {
@@ -1019,7 +1288,11 @@ export default function SpotlightDashboard() {
             {!isComplete && <span className="animate-pulse">_</span>}
           </span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-green-400 mb-2 tracking-tight">
+        <h1
+          className="text-4xl md:text-5xl font-bold text-green-400 mb-2 tracking-tight cursor-pointer select-none"
+          onClick={handleHeaderClick}
+          title="Triple-click to reset"
+        >
           <GlitchText>LIFE_DASHBOARD.exe</GlitchText>
         </h1>
         <p className="text-green-600 text-lg">
@@ -1540,6 +1813,9 @@ export default function SpotlightDashboard() {
           />
         </div>
       )}
+
+      {/* Matrix Shutdown Sequence */}
+      {showShutdown && <MatrixShutdown onReset={handleReset} />}
     </div>
   );
 }
