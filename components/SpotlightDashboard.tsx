@@ -542,6 +542,166 @@ function BeastCreatureFile({ photos, openLightbox }: { photos: Photo[]; openLigh
   );
 }
 
+// Food Protocol Component with Cutting/Bulking Toggle
+function FoodProtocol() {
+  const [mode, setMode] = useState<'cutting' | 'bulking'>('cutting');
+  const [animatedBars, setAnimatedBars] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimatedBars(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    setAnimatedBars(false);
+    const timer = setTimeout(() => setAnimatedBars(true), 50);
+    return () => clearTimeout(timer);
+  }, [mode]);
+
+  const macros = {
+    cutting: {
+      protein: { value: '1.0-1.2g/lb', width: 85, priority: 'PRIORITY' },
+      fat: { value: '25% kcal', width: 25, priority: 'REQUIRED' },
+      carbs: { value: 'remainder', width: 40, priority: 'FILL' },
+      label: 'CUTTING_MODE',
+    },
+    bulking: {
+      protein: { value: '0.8-1.0g/lb', width: 70, priority: 'MODERATE' },
+      fat: { value: '0.5g/lb', width: 35, priority: 'REQUIRED' },
+      carbs: { value: 'MAXIMUM', width: 95, priority: 'PRIORITY' },
+      label: 'BULKING_MODE',
+    },
+  };
+
+  const current = macros[mode];
+  const barColor = mode === 'cutting' ? 'bg-green-500' : 'bg-amber-500';
+  const textColor = mode === 'cutting' ? 'text-green-400' : 'text-amber-400';
+  const borderColor = mode === 'cutting' ? 'border-green-500' : 'border-amber-500';
+
+  const MacroBar = ({ label, value, width, priority }: { label: string; value: string; width: number; priority: string }) => (
+    <div className="flex items-center gap-3">
+      <span className="text-green-600 text-sm w-28">{label}:</span>
+      <span className={`${textColor} text-sm w-24`}>{value}</span>
+      <div className="flex-1 h-3 bg-green-900/50 rounded overflow-hidden">
+        <div
+          className={`h-full ${barColor} rounded transition-all duration-700 ease-out`}
+          style={{ width: animatedBars ? `${width}%` : '0%' }}
+        />
+      </div>
+      <span className={`${priority === 'PRIORITY' ? textColor : 'text-green-600'} text-xs w-20 text-right`}>{priority}</span>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="text-green-600 text-sm mb-6">
+        {'>'} loading nutrition_protocol...
+      </div>
+
+      {/* Mode Toggle */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setMode('cutting')}
+          className={`
+            flex-1 py-2 px-4 rounded border-2 transition-all duration-300
+            ${mode === 'cutting'
+              ? 'border-green-500 bg-green-500/20 text-green-400'
+              : 'border-green-500/30 bg-transparent text-green-700 hover:border-green-500/50'
+            }
+          `}
+        >
+          {'>'} CUTTING_MODE
+        </button>
+        <button
+          onClick={() => setMode('bulking')}
+          className={`
+            flex-1 py-2 px-4 rounded border-2 transition-all duration-300
+            ${mode === 'bulking'
+              ? 'border-amber-500 bg-amber-500/20 text-amber-400'
+              : 'border-green-500/30 bg-transparent text-green-700 hover:border-amber-500/50'
+            }
+          `}
+        >
+          {'>'} BULKING_MODE
+        </button>
+      </div>
+
+      {/* Macro Protocol Panel */}
+      <div className={`border ${borderColor}/50 rounded-lg p-4 mb-6 ${mode === 'cutting' ? 'bg-green-500/5' : 'bg-amber-500/5'} transition-colors duration-300`}>
+        <div className={`${textColor} text-sm mb-4 font-bold flex items-center justify-between`}>
+          <span>{'>'} MACRO_PROTOCOL</span>
+          <span className="animate-pulse">[{current.label}]</span>
+        </div>
+        <div className="space-y-3">
+          <MacroBar label="PROTEIN" value={current.protein.value} width={current.protein.width} priority={current.protein.priority} />
+          <MacroBar label="FAT" value={current.fat.value} width={current.fat.width} priority={current.fat.priority} />
+          <MacroBar label="CARBS" value={current.carbs.value} width={current.carbs.width} priority={current.carbs.priority} />
+        </div>
+
+        {/* Mode-specific note */}
+        {mode === 'bulking' && (
+          <div className="mt-4 pt-3 border-t border-amber-500/30">
+            <p className="text-amber-600 text-xs">⚡ CARB_SURPLUS: Maximum glycogen loading protocol engaged</p>
+          </div>
+        )}
+      </div>
+
+      {/* Meal Timeline */}
+      <div className="mb-6">
+        <div className="text-green-400 text-sm mb-4 font-bold">{'>'} DAILY_FUEL_SEQUENCE</div>
+        <div className="flex items-start justify-center gap-3">
+          {[
+            { icon: Sun, label: 'Breakfast', details: 'Oatmeal, eggs, greek yogurt + granola' },
+            { icon: Apple, label: 'Snacks', details: '2 protein bars, Cosmic Crisp apple' },
+            { icon: Sandwich, label: 'Lunch', details: 'Turkey, swiss, collagen shake' },
+            { icon: Moon, label: 'Dinner', details: 'Variable' },
+          ].map((meal, i, arr) => (
+            <div key={i} className="flex items-center">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-lg border border-green-500/50 bg-green-500/10 flex items-center justify-center mb-2 hover:bg-green-500/20 hover:border-green-400 transition-colors">
+                  <meal.icon size={24} className="text-green-400" />
+                </div>
+                <span className="text-green-400 text-xs font-bold mb-1">{meal.label}</span>
+                <span className="text-green-600 text-xs max-w-20 leading-tight">{meal.details}</span>
+              </div>
+              {i < arr.length - 1 && (
+                <div className="text-green-600 mx-1 mt-[-40px]">→</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Favorites */}
+      <div className="border border-cyan-500/50 bg-cyan-500/5 rounded-lg p-4 mb-4">
+        <div className="flex items-center gap-3">
+          <UtensilsCrossed size={24} className="text-cyan-400" />
+          <div>
+            <p className="text-cyan-400 font-bold">STAPLE: RICE</p>
+            <p className="text-cyan-600 text-sm">Could eat it every day</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Weakness Alert */}
+      <div className="border-2 border-red-500/50 bg-red-500/5 rounded-lg p-4">
+        <div className="flex items-center gap-3">
+          <AlertTriangle size={24} className="text-red-400" />
+          <IceCream size={24} className="text-red-300" />
+          <div>
+            <p className="text-red-400 font-bold">WEAKNESS_DETECTED</p>
+            <p className="text-red-600 text-sm">Ice cream - resistance: 0%</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
+        {'>'} EOF reached. Press [ESC] or click outside to close.
+      </div>
+    </div>
+  );
+}
+
 // Live Stats Hook
 function useLiveStats() {
   const [ping, setPing] = useState(12);
@@ -1119,95 +1279,7 @@ export default function SpotlightDashboard() {
                   )}
                 </div>
               ) : selectedCard.title === 'Food' ? (
-                <div>
-                  <div className="text-green-600 text-sm mb-6">
-                    {'>'} loading nutrition_protocol...
-                  </div>
-
-                  {/* Macro Protocol Panel */}
-                  <div className="border border-green-500/50 rounded-lg p-4 mb-6 bg-green-500/5">
-                    <div className="text-green-400 text-sm mb-4 font-bold">{'>'} MACRO_PROTOCOL</div>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-green-600 text-sm w-28">PROTEIN:</span>
-                        <span className="text-green-500 text-sm w-24">1.0-1.2g/lb</span>
-                        <div className="flex-1 h-3 bg-green-900/50 rounded overflow-hidden">
-                          <div className="h-full bg-green-500 rounded" style={{ width: '85%' }} />
-                        </div>
-                        <span className="text-green-400 text-xs">PRIORITY</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-green-600 text-sm w-28">FAT:</span>
-                        <span className="text-green-500 text-sm w-24">25% kcal</span>
-                        <div className="flex-1 h-3 bg-green-900/50 rounded overflow-hidden">
-                          <div className="h-full bg-green-500/70 rounded" style={{ width: '25%' }} />
-                        </div>
-                        <span className="text-green-600 text-xs">REQUIRED</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-green-600 text-sm w-28">CARBS:</span>
-                        <span className="text-green-500 text-sm w-24">remainder</span>
-                        <div className="flex-1 h-3 bg-green-900/50 rounded overflow-hidden">
-                          <div className="h-full bg-green-500/50 rounded" style={{ width: '50%' }} />
-                        </div>
-                        <span className="text-green-700 text-xs">FILL</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Meal Timeline */}
-                  <div className="mb-6">
-                    <div className="text-green-400 text-sm mb-4 font-bold">{'>'} DAILY_FUEL_SEQUENCE</div>
-                    <div className="flex items-start justify-center gap-3">
-                      {[
-                        { icon: Sun, label: 'Breakfast', details: 'Oatmeal, eggs, greek yogurt + granola' },
-                        { icon: Apple, label: 'Snacks', details: '2 protein bars, Cosmic Crisp apple' },
-                        { icon: Sandwich, label: 'Lunch', details: 'Turkey, swiss, collagen shake' },
-                        { icon: Moon, label: 'Dinner', details: 'Variable' },
-                      ].map((meal, i, arr) => (
-                        <div key={i} className="flex items-center">
-                          <div className="flex flex-col items-center text-center">
-                            <div className="w-12 h-12 rounded-lg border border-green-500/50 bg-green-500/10 flex items-center justify-center mb-2 hover:bg-green-500/20 hover:border-green-400 transition-colors">
-                              <meal.icon size={24} className="text-green-400" />
-                            </div>
-                            <span className="text-green-400 text-xs font-bold mb-1">{meal.label}</span>
-                            <span className="text-green-600 text-xs max-w-20 leading-tight">{meal.details}</span>
-                          </div>
-                          {i < arr.length - 1 && (
-                            <div className="text-green-600 mx-1 mt-[-40px]">→</div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Favorites */}
-                  <div className="border border-cyan-500/50 bg-cyan-500/5 rounded-lg p-4 mb-4">
-                    <div className="flex items-center gap-3">
-                      <UtensilsCrossed size={24} className="text-cyan-400" />
-                      <div>
-                        <p className="text-cyan-400 font-bold">STAPLE: RICE</p>
-                        <p className="text-cyan-600 text-sm">Could eat it every day</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Weakness Alert */}
-                  <div className="border-2 border-red-500/50 bg-red-500/5 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <AlertTriangle size={24} className="text-red-400" />
-                      <IceCream size={24} className="text-red-300" />
-                      <div>
-                        <p className="text-red-400 font-bold">WEAKNESS_DETECTED</p>
-                        <p className="text-red-600 text-sm">Ice cream - resistance: 0%</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
-                    {'>'} EOF reached. Press [ESC] or click outside to close.
-                  </div>
-                </div>
+                <FoodProtocol />
               ) : selectedCard.title === 'RAND()' ? (
                 <div className="flex flex-col items-center">
                   {/* Redacted Facts - Hover to Reveal */}
