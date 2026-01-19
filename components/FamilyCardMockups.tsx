@@ -525,6 +525,226 @@ function HybridMatrixSelectMockup() {
 }
 
 // ============================================
+// 10. FLOW - Stats to Photos Transition
+// ============================================
+function FlowMockup() {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [animatedBars, setAnimatedBars] = useState(false);
+  const [showPhotos, setShowPhotos] = useState(false);
+
+  // Animate bars when selection changes
+  useEffect(() => {
+    if (selectedIndex !== null) {
+      setAnimatedBars(false);
+      setShowPhotos(false);
+      const timer = setTimeout(() => setAnimatedBars(true), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedIndex]);
+
+  const selectedMember = selectedIndex !== null ? familyMembers[selectedIndex] : null;
+  const stats = selectedMember ? familyStats[selectedMember.codename] : null;
+
+  const handleAccessImagery = () => {
+    setShowPhotos(true);
+  };
+
+  const handleBack = () => {
+    setShowPhotos(false);
+  };
+
+  return (
+    <div className="border border-green-500/50 rounded-lg p-4 bg-black">
+      <div className="text-green-400 text-center text-lg font-bold mb-4">
+        {'>'} FAMILY UNIT DATABASE {'<'}
+      </div>
+
+      {/* Character Grid with Matrix Reveal */}
+      <div className="grid grid-cols-4 gap-3 mb-4">
+        {familyMembers.map((member, i) => (
+          <button
+            key={member.id}
+            onClick={() => setSelectedIndex(selectedIndex === i ? null : i)}
+            className={`
+              relative aspect-square rounded border-2 overflow-hidden transition-all duration-300
+              ${selectedIndex === i
+                ? 'border-green-400 scale-105 shadow-[0_0_20px_rgba(0,255,0,0.5)]'
+                : 'border-green-500/30 hover:border-green-500/50'
+              }
+            `}
+          >
+            {/* Revealed content underneath */}
+            <div className="absolute inset-0 bg-green-900/30 flex flex-col items-center justify-center">
+              <Users size={28} className="text-green-400 mb-1" />
+              <span className="text-green-400 text-xs font-bold">{member.codename}</span>
+              <span className="text-green-600 text-xs">"{member.name}"</span>
+            </div>
+
+            {/* Matrix rain overlay - fades on select */}
+            <div
+              className={`absolute inset-0 bg-black flex items-center justify-center transition-opacity duration-500 ${
+                selectedIndex === i ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}
+            >
+              <div className="text-green-500 font-mono text-xs leading-tight overflow-hidden">
+                {Array(6).fill(0).map((_, row) => (
+                  <div key={row} className="flex justify-center">
+                    {Array(8).fill(0).map((_, col) => (
+                      <span key={col} style={{ opacity: Math.random() * 0.8 + 0.2 }}>
+                        {String.fromCharCode(0x30A0 + Math.random() * 96)}
+                      </span>
+                    ))}
+                  </div>
+                ))}
+              </div>
+              <div className="absolute bottom-1 left-0 right-0 text-center">
+                <span className="text-green-700 text-xs">[ENCRYPTED]</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Stats Panel OR Photo Gallery */}
+      <div className={`
+        border border-green-500/30 rounded-lg overflow-hidden transition-all duration-300
+        ${selectedMember ? 'opacity-100' : 'opacity-50'}
+      `}>
+        <div className="bg-green-500/10 border-b border-green-500/30 px-4 py-2 flex items-center justify-between">
+          <span className="text-green-400 font-bold">
+            {selectedMember ? `${selectedMember.codename} // ${selectedMember.name}` : 'SELECT OPERATIVE'}
+          </span>
+          {selectedMember && (
+            <span className="text-green-500 text-xs animate-pulse">
+              {showPhotos ? '● IMAGERY MODE' : '● DECRYPTED'}
+            </span>
+          )}
+        </div>
+
+        {selectedMember && stats && !showPhotos && (
+          <div className="p-4 space-y-3">
+            {/* Role */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-green-600 w-20">ROLE:</span>
+              <span className="text-green-400">{selectedMember.role.toUpperCase()}</span>
+            </div>
+
+            {/* Specialty */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-green-600 w-20">SPECIALTY:</span>
+              <span className="text-cyan-400">{stats.specialty}</span>
+            </div>
+
+            {/* Age if available */}
+            {selectedMember.age && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-green-600 w-20">AGE:</span>
+                <span className="text-green-400">{selectedMember.age} cycles</span>
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="border-t border-green-500/30 my-2" />
+
+            {/* Stats Bars */}
+            <div className="space-y-2">
+              {stats.stats.map((stat) => (
+                <div key={stat.label} className="flex items-center gap-3">
+                  <span className="text-green-600 text-xs w-20">{stat.label}</span>
+                  <div className="flex-1 h-2 bg-green-900/50 rounded overflow-hidden">
+                    <div
+                      className={`h-full rounded transition-all duration-700 ease-out ${
+                        stat.value > 100 ? 'bg-red-400' : stat.value < 30 ? 'bg-yellow-500' : 'bg-green-400'
+                      }`}
+                      style={{ width: animatedBars ? `${Math.min(stat.value, 100)}%` : '0%' }}
+                    />
+                  </div>
+                  <span className={`text-xs w-10 text-right ${
+                    stat.value > 100 ? 'text-red-400' : stat.value < 30 ? 'text-yellow-500' : 'text-green-400'
+                  }`}>
+                    {stat.value}{stat.value > 100 ? '!' : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Note if available */}
+            {stats.note && (
+              <div className="mt-3 pt-3 border-t border-green-500/30">
+                <span className="text-cyan-600 text-xs">{'>'} {stats.note}</span>
+              </div>
+            )}
+
+            {/* ACCESS IMAGERY Button */}
+            <div className="mt-4 pt-4 border-t border-green-500/30">
+              <button
+                onClick={handleAccessImagery}
+                className="w-full py-3 rounded border-2 border-cyan-500/50 bg-cyan-500/10 text-cyan-400 font-bold
+                  hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]
+                  transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <span className="animate-pulse">▶</span>
+                ACCESS_IMAGERY
+                <span className="animate-pulse">◀</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Photo Gallery View */}
+        {selectedMember && showPhotos && (
+          <div className="p-4">
+            {/* Back button */}
+            <button
+              onClick={handleBack}
+              className="mb-4 text-green-600 text-sm hover:text-green-400 transition-colors flex items-center gap-2"
+            >
+              {'<'} RETURN_TO_STATS
+            </button>
+
+            {/* Photo grid placeholder */}
+            <div className="text-center mb-4">
+              <div className="text-green-400 text-sm mb-2">
+                {'>'} LOADING {selectedMember.codename}_IMAGERY...
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {[1, 2, 3, 4].map((num) => (
+                <div
+                  key={num}
+                  className="aspect-square rounded border border-green-500/30 bg-green-900/20
+                    flex flex-col items-center justify-center hover:border-green-400
+                    hover:bg-green-900/30 transition-all cursor-pointer group"
+                >
+                  <Users size={40} className="text-green-600 group-hover:text-green-400 transition-colors mb-2" />
+                  <span className="text-green-700 text-xs group-hover:text-green-500 transition-colors">
+                    IMG_{selectedMember.codename}_{String(num).padStart(2, '0')}.jpg
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Instructions */}
+            <div className="mt-4 pt-4 border-t border-green-500/30 text-center">
+              <span className="text-green-700 text-xs">
+                [Replace placeholders with actual photos in /public/images/]
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!selectedMember && (
+          <div className="p-4 text-center text-green-700 text-sm">
+            {'>'} Click an operative to decrypt their file...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================
 // 7. AGENTS IN THE FIELD - Map View
 // ============================================
 function AgentsMapMockup() {
@@ -644,7 +864,8 @@ export default function FamilyCardMockups() {
     { name: '6. Matrix Reveal', component: MatrixRainRevealMockup, description: 'Matrix rain parts on hover to reveal photos' },
     { name: '7. Agents Map', component: AgentsMapMockup, description: 'World map with location pins' },
     { name: '8. System Users', component: SystemUsersMockup, description: 'Linux user management style' },
-    { name: '9. Hybrid ★', component: HybridMatrixSelectMockup, description: 'Matrix reveal + character stats combined - click to decrypt & view stats' },
+    { name: '9. Hybrid', component: HybridMatrixSelectMockup, description: 'Matrix reveal + character stats combined - click to decrypt & view stats' },
+    { name: '10. Flow ★', component: FlowMockup, description: 'Stats first, then ACCESS_IMAGERY button to view photo gallery - the full experience' },
   ];
 
   const ActiveComponent = mockups[activeTab].component;
