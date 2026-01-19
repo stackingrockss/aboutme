@@ -542,6 +542,251 @@ function BeastCreatureFile({ photos, openLightbox }: { photos: Photo[]; openLigh
   );
 }
 
+// Family Flow Component - Matrix decrypt + stats + photos
+type FamilyMember = {
+  id: number;
+  name: string;
+  codename: string;
+  role: string;
+  status: string;
+  age: number | null;
+};
+
+type FamilyStat = {
+  label: string;
+  value: number;
+};
+
+type FamilyStatsData = {
+  stats: FamilyStat[];
+  specialty: string;
+  note?: string;
+};
+
+const familyMembers: FamilyMember[] = [
+  { id: 1, name: 'Tiffany', codename: 'TRINITY', role: 'co-admin', status: 'active', age: null },
+  { id: 2, name: 'Daniel', codename: 'CHAOS_AGENT', role: 'dev_ops', status: 'active', age: 9 },
+  { id: 3, name: 'Emilia', codename: 'SCHEDULER', role: 'sys_organizer', status: 'active', age: 6 },
+  { id: 4, name: 'Natalie', codename: 'WILDCARD', role: 'chaos_engine', status: 'active', age: 4 },
+];
+
+const familyStats: Record<string, FamilyStatsData> = {
+  'TRINITY': {
+    stats: [
+      { label: 'PATIENCE', value: 100 },
+      { label: 'SUPPORT', value: 100 },
+      { label: 'PARENTING', value: 110 },
+      { label: 'HUMOR', value: 90 },
+    ],
+    specialty: 'Expert Parent',
+    note: 'Godlike patience detected',
+  },
+  'CHAOS_AGENT': {
+    stats: [
+      { label: 'TECH_SKILL', value: 92 },
+      { label: 'HUMOR', value: 95 },
+      { label: 'CHAOS_GEN', value: 88 },
+      { label: 'SIBLING_TEASE', value: 94 },
+    ],
+    specialty: 'Tech Prodigy',
+    note: 'Primary instigator protocols',
+  },
+  'SCHEDULER': {
+    stats: [
+      { label: 'ORGANIZATION', value: 97 },
+      { label: 'SWEETNESS', value: 100 },
+      { label: 'ACTIVITY_LVL', value: 95 },
+      { label: 'PATIENCE', value: 85 },
+    ],
+    specialty: 'Multi-Activity Athlete',
+    note: 'Sports, cheer, everything.exe',
+  },
+  'WILDCARD': {
+    stats: [
+      { label: 'CHAOS', value: 110 },
+      { label: 'ADVENTURE', value: 100 },
+      { label: 'HUMOR', value: 95 },
+      { label: 'LOGIC', value: 15 },
+    ],
+    specialty: 'Chaos Engine',
+    note: 'WARNING: Irrational subroutines',
+  },
+};
+
+function FamilyFlow({ photos, openLightbox }: { photos: Photo[]; openLightbox: (photos: Photo[], index: number) => void }) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [animatedBars, setAnimatedBars] = useState(false);
+
+  useEffect(() => {
+    if (selectedIndex !== null) {
+      setAnimatedBars(false);
+      const timer = setTimeout(() => setAnimatedBars(true), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedIndex]);
+
+  const selectedMember = selectedIndex !== null ? familyMembers[selectedIndex] : null;
+  const stats = selectedMember ? familyStats[selectedMember.codename] : null;
+
+  return (
+    <div>
+      <div className="text-green-600 text-sm mb-4">
+        {'>'} loading family_database...
+      </div>
+
+      {/* Character Grid with Matrix Reveal */}
+      <div className="grid grid-cols-4 gap-3 mb-4">
+        {familyMembers.map((member, i) => (
+          <button
+            key={member.id}
+            onClick={() => setSelectedIndex(selectedIndex === i ? null : i)}
+            className={`
+              relative aspect-square rounded border-2 overflow-hidden transition-all duration-300
+              ${selectedIndex === i
+                ? 'border-green-400 scale-105 shadow-[0_0_20px_rgba(0,255,0,0.5)]'
+                : 'border-green-500/30 hover:border-green-500/50'
+              }
+            `}
+          >
+            {/* Revealed content underneath */}
+            <div className="absolute inset-0 bg-green-900/30 flex flex-col items-center justify-center">
+              <Heart size={28} className="text-green-400 mb-1" />
+              <span className="text-green-400 text-xs font-bold">{member.codename}</span>
+              <span className="text-green-600 text-xs">&quot;{member.name}&quot;</span>
+            </div>
+
+            {/* Matrix rain overlay - fades on select */}
+            <div
+              className={`absolute inset-0 bg-black flex items-center justify-center transition-opacity duration-500 ${
+                selectedIndex === i ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}
+            >
+              <div className="text-green-500 font-mono text-xs leading-tight overflow-hidden">
+                {Array(6).fill(0).map((_, row) => (
+                  <div key={row} className="flex justify-center">
+                    {Array(8).fill(0).map((_, col) => (
+                      <span key={col} style={{ opacity: Math.random() * 0.8 + 0.2 }}>
+                        {String.fromCharCode(0x30A0 + Math.random() * 96)}
+                      </span>
+                    ))}
+                  </div>
+                ))}
+              </div>
+              <div className="absolute bottom-1 left-0 right-0 text-center">
+                <span className="text-green-700 text-xs">[ENCRYPTED]</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Stats Panel */}
+      <div className={`
+        border border-green-500/30 rounded-lg overflow-hidden transition-all duration-300
+        ${selectedMember ? 'opacity-100' : 'opacity-50'}
+      `}>
+        <div className="bg-green-500/10 border-b border-green-500/30 px-4 py-2 flex items-center justify-between">
+          <span className="text-green-400 font-bold">
+            {selectedMember ? `${selectedMember.codename} // ${selectedMember.name}` : 'SELECT OPERATIVE'}
+          </span>
+          {selectedMember && (
+            <span className="text-green-500 text-xs animate-pulse">● DECRYPTED</span>
+          )}
+        </div>
+
+        {selectedMember && stats && (
+          <div className="p-4 space-y-3">
+            {/* Role */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-green-600 w-20">ROLE:</span>
+              <span className="text-green-400">{selectedMember.role.toUpperCase()}</span>
+            </div>
+
+            {/* Specialty */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-green-600 w-20">SPECIALTY:</span>
+              <span className="text-cyan-400">{stats.specialty}</span>
+            </div>
+
+            {/* Age if available */}
+            {selectedMember.age && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-green-600 w-20">AGE:</span>
+                <span className="text-green-400">{selectedMember.age} cycles</span>
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="border-t border-green-500/30 my-2" />
+
+            {/* Stats Bars */}
+            <div className="space-y-2">
+              {stats.stats.map((stat) => (
+                <div key={stat.label} className="flex items-center gap-3">
+                  <span className="text-green-600 text-xs w-20">{stat.label}</span>
+                  <div className="flex-1 h-2 bg-green-900/50 rounded overflow-hidden">
+                    <div
+                      className={`h-full rounded transition-all duration-700 ease-out ${
+                        stat.value > 100 ? 'bg-red-400' : stat.value < 30 ? 'bg-yellow-500' : 'bg-green-400'
+                      }`}
+                      style={{ width: animatedBars ? `${Math.min(stat.value, 100)}%` : '0%' }}
+                    />
+                  </div>
+                  <span className={`text-xs w-10 text-right ${
+                    stat.value > 100 ? 'text-red-400' : stat.value < 30 ? 'text-yellow-500' : 'text-green-400'
+                  }`}>
+                    {stat.value}{stat.value > 100 ? '!' : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Note if available */}
+            {stats.note && (
+              <div className="mt-3 pt-3 border-t border-green-500/30">
+                <span className="text-cyan-600 text-xs">{'>'} {stats.note}</span>
+              </div>
+            )}
+
+            {/* Status */}
+            <div className="mt-3 pt-3 border-t border-green-500/30 flex items-center justify-between">
+              <span className="text-green-600 text-xs">STATUS:</span>
+              <span className="text-green-400 text-xs flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                ACTIVE
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!selectedMember && (
+          <div className="p-4 text-center text-green-700 text-sm">
+            {'>'} Click an operative to decrypt their file...
+          </div>
+        )}
+      </div>
+
+      {/* ACCESS IMAGERY Button */}
+      <div className="mt-4">
+        <button
+          onClick={() => openLightbox(photos, 0)}
+          className="w-full py-3 rounded border-2 border-cyan-500/50 bg-cyan-500/10 text-cyan-400 font-bold
+            hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]
+            transition-all duration-300 flex items-center justify-center gap-2"
+        >
+          <span className="animate-pulse">▶</span>
+          ACCESS_IMAGERY [{photos.length} files]
+          <span className="animate-pulse">◀</span>
+        </button>
+      </div>
+
+      <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
+        {'>'} EOF reached. Press [ESC] or click outside to close.
+      </div>
+    </div>
+  );
+}
+
 // Food Protocol Component with Cutting/Bulking Toggle
 function FoodProtocol() {
   const [mode, setMode] = useState<'cutting' | 'bulking'>('cutting');
@@ -919,11 +1164,11 @@ function MatrixShutdown({ onReset }: { onReset: () => void }) {
       {/* Final message */}
       {phase === 'message' && (
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-auto cursor-pointer"
+          className="absolute inset-0 flex items-center justify-center pointer-events-auto cursor-pointer"
           onClick={onReset}
         >
           <div
-            className="text-green-500 text-3xl md:text-5xl font-mono font-bold tracking-wide mb-8"
+            className="text-green-500 text-3xl md:text-5xl font-mono font-bold tracking-wide"
             style={{
               opacity: messageOpacity,
               textShadow: '0 0 30px rgba(0, 255, 0, 0.8)',
@@ -931,12 +1176,6 @@ function MatrixShutdown({ onReset }: { onReset: () => void }) {
             }}
           >
             You&apos;ve seen too much...
-          </div>
-          <div
-            className="text-green-700 text-sm font-mono"
-            style={{ opacity: messageOpacity * 0.7 }}
-          >
-            {'>'} click anywhere to reinitialize_
           </div>
         </div>
       )}
@@ -1551,6 +1790,8 @@ export default function SpotlightDashboard() {
                     </div>
                   )}
                 </div>
+              ) : selectedCard.title === 'Family' ? (
+                <FamilyFlow photos={selectedCard.content.photos} openLightbox={openLightbox} />
               ) : selectedCard.title === 'Food' ? (
                 <FoodProtocol />
               ) : selectedCard.title === 'RAND()' ? (
