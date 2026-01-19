@@ -111,8 +111,8 @@ const cards: Card[] = [
         '  └ Next.js 15, React 19, Tailwind v4, shadcn/ui, Prisma, Supabase, Zustand, Inngest, Gemini, ReactFlow',
         'Debian Server - Self-hosted infrastructure backbone',
         '  └ Frigate - NVR with AI object detection',
-        '  └ Home Assistant - Smart home automation (50+ devices)',
-        '  └ Immich - Private photo backup (Google Photos alternative)'
+        '  └ Home Assistant - Smart home automation',
+        '  └ Immich - Open source Google Photos'
       ],
       photos: []
     }
@@ -158,7 +158,7 @@ const cards: Card[] = [
       headline: 'RANDOM_MEMORY_ACCESS',
       facts: [
         'I worked at a mortuary',
-        'My favorite composer is Chopin',
+        'I play the piano and my favorite composer is Chopin',
         'I accidentally set my car on fire'
       ],
       photos: []
@@ -628,6 +628,10 @@ const familyStats: Record<string, FamilyStatsData> = {
 function FamilyFlow({ photos, openLightbox }: { photos: Photo[]; openLightbox: (photos: Photo[], index: number) => void }) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [animatedBars, setAnimatedBars] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
+  const [galleryPage, setGalleryPage] = useState(0);
+  const PHOTOS_PER_PAGE = 4;
+  const totalPages = Math.ceil(photos.length / PHOTOS_PER_PAGE);
 
   useEffect(() => {
     if (selectedIndex !== null) {
@@ -639,6 +643,11 @@ function FamilyFlow({ photos, openLightbox }: { photos: Photo[]; openLightbox: (
 
   const selectedMember = selectedIndex !== null ? familyMembers[selectedIndex] : null;
   const stats = selectedMember ? familyStats[selectedMember.codename] : null;
+
+  const currentPhotos = photos.slice(
+    galleryPage * PHOTOS_PER_PAGE,
+    (galleryPage + 1) * PHOTOS_PER_PAGE
+  );
 
   return (
     <div>
@@ -785,18 +794,91 @@ function FamilyFlow({ photos, openLightbox }: { photos: Photo[]; openLightbox: (
         )}
       </div>
 
-      {/* ACCESS IMAGERY Button */}
+      {/* ACCESS IMAGERY Button / Gallery */}
       <div className="mt-4">
-        <button
-          onClick={() => openLightbox(photos, 0)}
-          className="w-full py-3 rounded border-2 border-cyan-500/50 bg-cyan-500/10 text-cyan-400 font-bold
-            hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]
-            transition-all duration-300 flex items-center justify-center gap-2"
-        >
-          <span className="animate-pulse">▶</span>
-          ACCESS_IMAGERY [{photos.length} files]
-          <span className="animate-pulse">◀</span>
-        </button>
+        {!showGallery ? (
+          <button
+            onClick={() => setShowGallery(true)}
+            className="w-full py-3 rounded border-2 border-cyan-500/50 bg-cyan-500/10 text-cyan-400 font-bold
+              hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]
+              transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            <span className="animate-pulse">▶</span>
+            ACCESS_IMAGERY [{photos.length} files]
+            <span className="animate-pulse">◀</span>
+          </button>
+        ) : (
+          <div className="border-2 border-cyan-500/50 rounded-lg overflow-hidden">
+            {/* Gallery Header */}
+            <div className="bg-cyan-500/10 border-b border-cyan-500/30 px-4 py-2 flex items-center justify-between">
+              <span className="text-cyan-400 font-bold text-sm">
+                IMAGERY_DATABASE [{galleryPage + 1}/{totalPages}]
+              </span>
+              <button
+                onClick={() => { setShowGallery(false); setGalleryPage(0); }}
+                className="text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Photo Grid - 2x2 */}
+            <div className="grid grid-cols-2 gap-2 p-3">
+              {currentPhotos.map((photo, index) => (
+                <button
+                  key={galleryPage * PHOTOS_PER_PAGE + index}
+                  onClick={() => openLightbox(photos, galleryPage * PHOTOS_PER_PAGE + index)}
+                  className="relative aspect-square rounded border border-cyan-500/30 overflow-hidden
+                    hover:border-cyan-400 hover:shadow-[0_0_10px_rgba(0,255,255,0.3)] transition-all group"
+                >
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt || ''}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 transition-colors" />
+                  <div className="absolute bottom-1 right-1 bg-black/70 px-1.5 py-0.5 rounded text-xs text-cyan-400">
+                    [{String(galleryPage * PHOTOS_PER_PAGE + index + 1).padStart(2, '0')}]
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="border-t border-cyan-500/30 px-4 py-2 flex items-center justify-between">
+              <button
+                onClick={() => setGalleryPage(p => p - 1)}
+                disabled={galleryPage === 0}
+                className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 disabled:text-cyan-700 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={18} />
+                <span className="text-sm">PREV</span>
+              </button>
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setGalleryPage(i)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      i === galleryPage
+                        ? 'bg-cyan-400 shadow-[0_0_8px_rgba(0,255,255,0.5)]'
+                        : 'bg-cyan-700 hover:bg-cyan-500'
+                    }`}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => setGalleryPage(p => p + 1)}
+                disabled={galleryPage === totalPages - 1}
+                className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 disabled:text-cyan-700 disabled:cursor-not-allowed transition-colors"
+              >
+                <span className="text-sm">NEXT</span>
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-6 pt-4 border-t border-green-500/30 text-green-700 text-sm">
@@ -1241,7 +1323,7 @@ export default function SpotlightDashboard() {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [lightbox, setLightbox] = useState<{ photos: Photo[]; index: number } | null>(null);
   const [photoPage, setPhotoPage] = useState(0);
-  const [showCarFireVideo, setShowCarFireVideo] = useState(false);
+  const [showCarFireImage, setShowCarFireImage] = useState(false);
   const [revealedFacts, setRevealedFacts] = useState<Set<number>>(new Set());
   const [openedCards, setOpenedCards] = useState<Set<number>>(new Set());
   const [showShutdown, setShowShutdown] = useState(false);
@@ -1266,7 +1348,6 @@ export default function SpotlightDashboard() {
   const flickeringCardIndex = useRandomFlicker(cards.length);
   const chopinAudio = useRef<HTMLAudioElement | null>(null);
   const funeralAudio = useRef<HTMLAudioElement | null>(null);
-  const carFireVideoRef = useRef<HTMLVideoElement | null>(null);
 
   // Load opened cards from localStorage on mount
   useEffect(() => {
@@ -1333,7 +1414,7 @@ export default function SpotlightDashboard() {
   }, []);
 
   const getAudioForFact = (fact: string): HTMLAudioElement | null => {
-    if (fact.toLowerCase().includes('composer') || fact.toLowerCase().includes('chopin')) {
+    if (fact.toLowerCase().includes('piano') || fact.toLowerCase().includes('chopin')) {
       return chopinAudio.current;
     }
     if (fact.toLowerCase().includes('mortuary')) {
@@ -1346,13 +1427,7 @@ export default function SpotlightDashboard() {
     setRevealedFacts(prev => new Set(prev).add(index));
 
     if (fact.toLowerCase().includes('car on fire') || fact.toLowerCase().includes('set my car')) {
-      setShowCarFireVideo(true);
-      setTimeout(() => {
-        if (carFireVideoRef.current) {
-          carFireVideoRef.current.playbackRate = 2;
-          carFireVideoRef.current.play().catch(() => {});
-        }
-      }, 0);
+      setShowCarFireImage(true);
       return;
     }
     const audio = getAudioForFact(fact);
@@ -1367,11 +1442,7 @@ export default function SpotlightDashboard() {
     });
 
     if (fact.toLowerCase().includes('car on fire') || fact.toLowerCase().includes('set my car')) {
-      setShowCarFireVideo(false);
-      if (carFireVideoRef.current) {
-        carFireVideoRef.current.pause();
-        carFireVideoRef.current.currentTime = 0;
-      }
+      setShowCarFireImage(false);
       return;
     }
     const audio = getAudioForFact(fact);
@@ -2061,14 +2132,12 @@ export default function SpotlightDashboard() {
         </div>
       )}
 
-      {/* Car Fire Video Popup */}
-      {showCarFireVideo && (
+      {/* Car Fire Image Popup */}
+      {showCarFireImage && (
         <div className="fixed bottom-8 right-8 z-[70] border-2 border-green-500 rounded-lg overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.4)]">
-          <video
-            ref={carFireVideoRef}
-            src="/video/carfire.mp4"
-            muted
-            loop
+          <img
+            src="/images/carfire.jpg"
+            alt="Car fire"
             className="w-80 h-auto"
           />
         </div>
