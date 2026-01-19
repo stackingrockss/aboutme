@@ -1324,19 +1324,88 @@ function MatrixShutdown({ onReset }: { onReset: () => void }) {
           100% { opacity: 0.1; }
         }
         @keyframes textGlitch {
-          0% { transform: translate(0) skew(0deg); }
-          20% { transform: translate(-3px, 3px) skew(2deg); }
-          40% { transform: translate(3px, -3px) skew(-2deg); }
-          60% { transform: translate(-3px, -3px) skew(2deg); }
-          80% { transform: translate(3px, 3px) skew(-2deg); }
-          100% { transform: translate(0) skew(0deg); }
+          0%, 100% {
+            transform: translate(0) skew(0deg);
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.5);
+          }
+          10% {
+            transform: translate(-4px, 3px) skew(3deg);
+            text-shadow: -4px 0 #ff0000, 4px 0 #00ffff, 0 0 20px rgba(255, 0, 0, 0.8);
+          }
+          20% {
+            transform: translate(4px, -3px) skew(-3deg);
+            text-shadow: 4px 0 #ff0000, -4px 0 #00ffff, 0 0 20px rgba(255, 0, 0, 0.8);
+          }
+          30% {
+            transform: translate(-2px, -4px) skew(2deg);
+            text-shadow: -2px 2px #ff0000, 2px -2px #00ffff, 0 0 30px rgba(255, 0, 0, 0.9);
+          }
+          40% {
+            transform: translate(3px, 4px) skew(-2deg);
+            text-shadow: 3px 0 #ff0000, -3px 0 #00ffff, 0 0 20px rgba(255, 0, 0, 0.8);
+          }
+          50% {
+            transform: translate(-5px, 2px) skew(4deg);
+            text-shadow: -5px 0 #ff0000, 5px 0 #00ffff, 0 0 40px rgba(255, 0, 0, 1);
+          }
+          60% {
+            transform: translate(5px, -2px) skew(-4deg);
+            text-shadow: 5px 0 #ff0000, -5px 0 #00ffff, 0 0 20px rgba(255, 0, 0, 0.8);
+          }
+          70% {
+            transform: translate(-3px, 5px) skew(3deg);
+            text-shadow: -3px 3px #ff0000, 3px -3px #00ffff, 0 0 30px rgba(255, 0, 0, 0.9);
+          }
+          80% {
+            transform: translate(2px, -5px) skew(-3deg);
+            text-shadow: 2px 0 #ff0000, -2px 0 #00ffff, 0 0 20px rgba(255, 0, 0, 0.8);
+          }
+          90% {
+            transform: translate(-4px, 4px) skew(2deg);
+            text-shadow: -4px 0 #ff0000, 4px 0 #00ffff, 0 0 35px rgba(255, 0, 0, 0.95);
+          }
         }
         @keyframes subtleGlitch {
-          0%, 90%, 100% { transform: translate(0); opacity: 1; }
-          92% { transform: translate(-2px, 1px); opacity: 0.8; }
-          94% { transform: translate(2px, -1px); opacity: 0.9; }
-          96% { transform: translate(-1px, 2px); opacity: 0.8; }
-          98% { transform: translate(1px, -2px); opacity: 1; }
+          0%, 85%, 100% {
+            transform: translate(0);
+            opacity: 1;
+            text-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
+          }
+          86% {
+            transform: translate(-3px, 2px) skew(1deg);
+            opacity: 0.9;
+            text-shadow: -3px 0 #ff0000, 3px 0 #00ffff, 0 0 30px rgba(0, 255, 0, 0.8);
+          }
+          88% {
+            transform: translate(3px, -2px) skew(-1deg);
+            opacity: 0.85;
+            text-shadow: 3px 0 #ff0000, -3px 0 #00ffff, 0 0 30px rgba(0, 255, 0, 0.8);
+          }
+          90% {
+            transform: translate(-2px, 3px);
+            opacity: 0.9;
+            text-shadow: -2px 2px #ff0000, 2px -2px #00ffff, 0 0 35px rgba(0, 255, 0, 0.9);
+          }
+          92% {
+            transform: translate(2px, -3px) skew(2deg);
+            opacity: 0.8;
+            text-shadow: 4px 0 #ff0000, -4px 0 #00ffff, 0 0 30px rgba(0, 255, 0, 0.8);
+          }
+          94% {
+            transform: translate(-4px, 1px) skew(-2deg);
+            opacity: 0.85;
+            text-shadow: -4px 0 #ff0000, 4px 0 #00ffff, 0 0 40px rgba(0, 255, 0, 1);
+          }
+          96% {
+            transform: translate(4px, -1px);
+            opacity: 0.9;
+            text-shadow: 2px 0 #ff0000, -2px 0 #00ffff, 0 0 30px rgba(0, 255, 0, 0.8);
+          }
+          98% {
+            transform: translate(-1px, 2px) skew(1deg);
+            opacity: 0.95;
+            text-shadow: -3px 0 #ff0000, 3px 0 #00ffff, 0 0 35px rgba(0, 255, 0, 0.9);
+          }
         }
       `}</style>
     </div>
@@ -1350,7 +1419,6 @@ export default function SpotlightDashboard() {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [lightbox, setLightbox] = useState<{ photos: Photo[]; index: number } | null>(null);
   const [photoPage, setPhotoPage] = useState(0);
-  const [showCarFireImage, setShowCarFireImage] = useState(false);
   const [revealedFacts, setRevealedFacts] = useState<Set<number>>(new Set());
   const [openedCards, setOpenedCards] = useState<Set<number>>(new Set());
   const [showShutdown, setShowShutdown] = useState(false);
@@ -1453,8 +1521,8 @@ export default function SpotlightDashboard() {
   const handleFactHover = (fact: string, index: number) => {
     setRevealedFacts(prev => new Set(prev).add(index));
 
+    // Skip audio for car fire - it has its own visual effect
     if (fact.toLowerCase().includes('car on fire') || fact.toLowerCase().includes('set my car')) {
-      setShowCarFireImage(true);
       return;
     }
     const audio = getAudioForFact(fact);
@@ -1468,8 +1536,8 @@ export default function SpotlightDashboard() {
       return next;
     });
 
+    // Skip audio cleanup for car fire
     if (fact.toLowerCase().includes('car on fire') || fact.toLowerCase().includes('set my car')) {
-      setShowCarFireImage(false);
       return;
     }
     const audio = getAudioForFact(fact);
@@ -1919,19 +1987,42 @@ export default function SpotlightDashboard() {
                     <div className="text-green-600 text-sm mb-3">
                       {'>'} CLASSIFIED_RECORDS [hover to decrypt]
                     </div>
-                    {selectedCard.content.facts.map((fact, i) => (
-                      <div
-                        key={i}
-                        onMouseEnter={() => handleFactHover(fact, i)}
-                        onMouseLeave={() => handleFactLeave(fact, i)}
-                        className="flex items-center gap-2 p-3 border border-green-500/30 rounded bg-green-500/5 hover:bg-green-500/10 hover:border-green-400 transition-all cursor-pointer group"
-                      >
-                        <span className="text-green-600 flex-shrink-0">[{String(i + 1).padStart(2, '0')}]</span>
-                        <span className={`font-mono transition-all duration-300 ${revealedFacts.has(i) ? 'text-green-400' : 'text-green-700 select-none'}`}>
-                          {revealedFacts.has(i) ? fact : getRedactedText(fact)}
-                        </span>
-                      </div>
-                    ))}
+                    {selectedCard.content.facts.map((fact, i) => {
+                      const isCarFire = fact.toLowerCase().includes('car on fire') || fact.toLowerCase().includes('set my car');
+                      return (
+                        <div
+                          key={i}
+                          onMouseEnter={() => handleFactHover(fact, i)}
+                          onMouseLeave={() => handleFactLeave(fact, i)}
+                          className={`relative flex items-center gap-2 p-3 border rounded transition-all cursor-pointer group overflow-hidden
+                            ${isCarFire && revealedFacts.has(i)
+                              ? 'border-orange-500/50 bg-gradient-to-t from-orange-900/20 to-transparent'
+                              : 'border-green-500/30 bg-green-500/5 hover:bg-green-500/10 hover:border-green-400'
+                            }`}
+                        >
+                          {/* Fire effect for car fire statement */}
+                          {isCarFire && revealedFacts.has(i) && (
+                            <div className="absolute inset-x-0 bottom-0 h-full pointer-events-none">
+                              <div className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-t from-orange-600/40 via-red-500/20 to-transparent animate-pulse" />
+                              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-yellow-500/30 via-orange-500/10 to-transparent"
+                                style={{ animation: 'flicker 0.3s ease-in-out infinite alternate' }} />
+                            </div>
+                          )}
+                          <span className={`flex-shrink-0 ${isCarFire && revealedFacts.has(i) ? 'text-orange-500' : 'text-green-600'}`}>
+                            [{String(i + 1).padStart(2, '0')}]
+                          </span>
+                          <span className={`font-mono transition-all duration-300 relative z-10 ${
+                            revealedFacts.has(i)
+                              ? isCarFire
+                                ? 'text-orange-400'
+                                : 'text-green-400'
+                              : 'text-green-700 select-none'
+                          }`}>
+                            {revealedFacts.has(i) ? fact : getRedactedText(fact)}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Status Text */}
@@ -1954,13 +2045,13 @@ export default function SpotlightDashboard() {
 
                     {/* Photo or Placeholder */}
                     {randPhoto ? (
-                      <div className={`w-full h-full rounded border-2 border-green-500 overflow-hidden ${randIsSpinning ? 'opacity-70' : ''}`}>
+                      <div className={`relative w-full h-full rounded border-2 border-green-500 overflow-hidden ${randIsSpinning ? 'opacity-70' : ''}`}>
                         <Image
                           src={randPhoto.src}
                           alt={randPhoto.alt || 'Random memory'}
-                          width={600}
-                          height={450}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 600px"
+                          className="object-cover"
                         />
                       </div>
                     ) : (
@@ -2160,16 +2251,6 @@ export default function SpotlightDashboard() {
         </div>
       )}
 
-      {/* Car Fire Image Popup */}
-      {showCarFireImage && (
-        <div className="fixed bottom-8 right-8 z-[70] border-2 border-green-500 rounded-lg overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.4)]">
-          <img
-            src="/images/carfire.jpg"
-            alt="Car fire"
-            className="w-80 h-auto"
-          />
-        </div>
-      )}
 
       {/* Matrix Shutdown Sequence */}
       {showShutdown && <MatrixShutdown onReset={handleReset} />}
