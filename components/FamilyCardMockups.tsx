@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Heart, MapPin, Globe } from 'lucide-react';
-import Image from 'next/image';
+import { Users, MapPin, Globe } from 'lucide-react';
 
 // Sample family data - you'd replace with real data
 const familyMembers = [
@@ -46,23 +45,25 @@ function TheCrewMockup() {
 // ============================================
 // 2. TERMINAL DOSSIERS - Typing Animation
 // ============================================
+const dossierLines = [
+  '> ACCESSING PERSONNEL FILE...',
+  '> CODENAME: "TRINITY"',
+  '> ROLE: Life Partner',
+  '> STATUS: ACTIVE',
+  '> CLEARANCE: LEVEL 10',
+  '> SKILLS: Patience.exe, Support.dll',
+  '> NOTE: Best teammate in the game',
+];
+
 function TerminalDossiersMockup() {
   const [typedLines, setTypedLines] = useState<string[]>([]);
-  const lines = [
-    '> ACCESSING PERSONNEL FILE...',
-    '> CODENAME: "TRINITY"',
-    '> ROLE: Life Partner',
-    '> STATUS: ACTIVE',
-    '> CLEARANCE: LEVEL 10',
-    '> SKILLS: Patience.exe, Support.dll',
-    '> NOTE: Best teammate in the game',
-  ];
 
   useEffect(() => {
+    setTypedLines([]);
     let i = 0;
     const timer = setInterval(() => {
-      if (i < lines.length) {
-        setTypedLines(prev => [...prev, lines[i]]);
+      if (i < dossierLines.length) {
+        setTypedLines(prev => [...prev, dossierLines[i]]);
         i++;
       } else {
         clearInterval(timer);
@@ -219,7 +220,7 @@ function SurveillanceFeedMockup() {
       <div className="text-green-600 text-sm mb-4">{'>'} ACCESSING SURVEILLANCE_NETWORK...</div>
 
       <div className="grid grid-cols-2 gap-2">
-        {['CAM-01', 'CAM-02', 'CAM-03', 'CAM-04'].map((cam, i) => (
+        {['CAM-01', 'CAM-02', 'CAM-03', 'CAM-04'].map((cam) => (
           <div key={cam} className="relative border border-green-500/30 rounded overflow-hidden bg-green-900/10 aspect-video">
             {/* Scanlines overlay */}
             <div
