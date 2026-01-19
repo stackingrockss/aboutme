@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="matrixGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ff41;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#008f11;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="32" height="32" rx="6" fill="#030712"/>
+
+  <!-- Matrix rain effect - falling characters -->
+  <text x="4" y="8" font-family="monospace" font-size="6" fill="#00ff41" opacity="0.3">1</text>
+  <text x="12" y="12" font-family="monospace" font-size="6" fill="#00ff41" opacity="0.5">0</text>
+  <text x="20" y="6" font-family="monospace" font-size="6" fill="#00ff41" opacity="0.4">1</text>
+  <text x="26" y="10" font-family="monospace" font-size="6" fill="#00ff41" opacity="0.3">0</text>
+
+  <!-- Center terminal cursor/bracket symbol -->
+  <text x="6" y="22" font-family="monospace" font-size="16" font-weight="bold" fill="url(#matrixGrad)">&gt;_</text>
+
+  <!-- More matrix rain -->
+  <text x="4" y="30" font-family="monospace" font-size="6" fill="#00ff41" opacity="0.2">0</text>
+  <text x="22" y="28" font-family="monospace" font-size="6" fill="#00ff41" opacity="0.4">1</text>
+  <text x="26" y="24" font-family="monospace" font-size="6" fill="#00ff41" opacity="0.3">1</text>
+</svg>

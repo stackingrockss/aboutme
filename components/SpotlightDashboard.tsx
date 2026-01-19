@@ -4,13 +4,16 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, Heart, Dog, Gamepad2, UtensilsCrossed, Dices, ChevronLeft, ChevronRight, LucideIcon, FolderGit2, Terminal, Dumbbell, Bike, Mountain, Snowflake, Footprints, Flower2, Trophy, Baby, Sun, Apple, Sandwich, Moon, AlertTriangle, IceCream } from 'lucide-react';
 import Image from 'next/image';
 
-// Random memory photos for RAND() card - add your photos here
+// Random memory photos for RAND() card
 const randomMemoryPhotos: Photo[] = [
-  { src: '/images/random1.jpg', alt: 'Random memory 1' },
-  { src: '/images/random2.jpg', alt: 'Random memory 2' },
-  { src: '/images/random3.jpg', alt: 'Random memory 3' },
-  { src: '/images/random4.jpg', alt: 'Random memory 4' },
-  { src: '/images/random5.jpg', alt: 'Random memory 5' },
+  { src: '/images/PXL_20240226_012627576.jpg', alt: 'Memory' },
+  { src: '/images/PXL_20250113_002516949.jpg', alt: 'Memory' },
+  { src: '/images/PXL_20251112_001137687.jpg', alt: 'Memory' },
+  { src: '/images/patches.PORTRAIT.jpg', alt: 'Patches' },
+  { src: '/images/natalie2.jpg', alt: 'Natalie' },
+  { src: '/images/mtrainier.jpg', alt: 'Mt Rainier' },
+  { src: '/images/hiking-snow.jpg', alt: 'Hiking in the snow' },
+  { src: '/images/waterfall.jpg', alt: 'Waterfall' },
 ];
 
 type Photo = {
@@ -51,7 +54,11 @@ const cards: Card[] = [
         { src: '/images/matt-and-daniel.jpg', alt: 'Matt and Daniel' },
         { src: '/images/family-pic.jpg', alt: 'Family picture' },
         { src: '/images/family-pic-mountains.jpg', alt: 'Family picture in mountains' },
-        { src: '/images/grandparents-with-kids.jpg', alt: 'Grandparents with kids' }
+        { src: '/images/grandparents-with-kids.jpg', alt: 'Grandparents with kids' },
+        { src: '/images/moose.jpg', alt: 'Moose' },
+        { src: '/images/daniel-emilia-manito.jpg', alt: 'Daniel and Emilia at Manito' },
+        { src: '/images/loot.jpg', alt: 'Loot' },
+        { src: '/images/garden.jpg', alt: 'Garden' }
       ]
     }
   },
@@ -76,7 +83,11 @@ const cards: Card[] = [
         { src: '/images/molly4.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly5.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly6.jpg', alt: 'Molly the Leonberger' },
-        { src: '/images/molly7.jpg', alt: 'Molly the Leonberger' }
+        { src: '/images/molly7.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly8.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly9.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly13.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/mollypuppy.jpg', alt: 'Molly as a puppy' }
       ]
     }
   },
@@ -550,6 +561,7 @@ type FamilyMember = {
   role: string;
   status: string;
   age: number | null;
+  photo: string;
 };
 
 type FamilyStat = {
@@ -564,10 +576,10 @@ type FamilyStatsData = {
 };
 
 const familyMembers: FamilyMember[] = [
-  { id: 1, name: 'Tiffany', codename: 'TRINITY', role: 'co-admin', status: 'active', age: null },
-  { id: 2, name: 'Daniel', codename: 'CHAOS_AGENT', role: 'dev_ops', status: 'active', age: 9 },
-  { id: 3, name: 'Emilia', codename: 'SCHEDULER', role: 'sys_organizer', status: 'active', age: 6 },
-  { id: 4, name: 'Natalie', codename: 'WILDCARD', role: 'chaos_engine', status: 'active', age: 4 },
+  { id: 1, name: 'Tiffany', codename: 'TRINITY', role: 'co-admin', status: 'active', age: null, photo: '/images/tiffany.jpg' },
+  { id: 2, name: 'Daniel', codename: 'CHAOS_AGENT', role: 'dev_ops', status: 'active', age: 9, photo: '/images/daniel.jpg' },
+  { id: 3, name: 'Emilia', codename: 'SCHEDULER', role: 'sys_organizer', status: 'active', age: 6, photo: '/images/emilia.jpg' },
+  { id: 4, name: 'Natalie', codename: 'WILDCARD', role: 'chaos_engine', status: 'active', age: 4, photo: '/images/natalie.jpg' },
 ];
 
 const familyStats: Record<string, FamilyStatsData> = {
@@ -648,11 +660,18 @@ function FamilyFlow({ photos, openLightbox }: { photos: Photo[]; openLightbox: (
               }
             `}
           >
-            {/* Revealed content underneath */}
-            <div className="absolute inset-0 bg-green-900/30 flex flex-col items-center justify-center">
-              <Heart size={28} className="text-green-400 mb-1" />
-              <span className="text-green-400 text-xs font-bold">{member.codename}</span>
-              <span className="text-green-600 text-xs">&quot;{member.name}&quot;</span>
+            {/* Revealed content underneath - photo */}
+            <div className="absolute inset-0">
+              <Image
+                src={member.photo}
+                alt={member.name}
+                fill
+                className="object-cover"
+              />
+              {/* Overlay with name */}
+              <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-1 text-center">
+                <span className="text-green-400 text-xs font-bold">{member.codename}</span>
+              </div>
             </div>
 
             {/* Matrix rain overlay - fades on select */}
