@@ -595,10 +595,10 @@ const familyStats: Record<string, FamilyStatsData> = {
   },
   'CHAOS_AGENT': {
     stats: [
-      { label: 'TECH_SKILL', value: 92 },
-      { label: 'HUMOR', value: 95 },
+      { label: 'TECH_SKILL', value: 110 },
+      { label: 'HUMOR', value: 110 },
       { label: 'CHAOS_GEN', value: 88 },
-      { label: 'SIBLING_TEASE', value: 94 },
+      { label: 'SIBLING_TEASE', value: 110 },
     ],
     specialty: 'Tech Prodigy',
     note: 'Primary instigator protocols',
