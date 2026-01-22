@@ -50,6 +50,10 @@ const cards: Card[] = [
       headline: 'The Family',
       facts: [],
       photos: [
+        { src: '/images/kids-skiing.jpg', alt: 'Kids skiing' },
+        { src: '/images/matt-tiffany-prom.jpg', alt: 'Matt and Tiffany prom' },
+        { src: '/images/family-old.jpg', alt: 'Family old photo' },
+        { src: '/images/bryce-canyon.jpg', alt: 'Bryce Canyon' },
         { src: '/images/bamff-family.jpg', alt: 'Bamff family' },
         { src: '/images/matt-and-tiffany-waterfall.jpg', alt: 'Matt and Tiffany at waterfall' },
         { src: '/images/matt-and-tiffany.jpg', alt: 'Matt and Tiffany' },
@@ -61,11 +65,7 @@ const cards: Card[] = [
         { src: '/images/moose.jpg', alt: 'Moose' },
         { src: '/images/daniel-emilia-manito.jpg', alt: 'Daniel and Emilia at Manito' },
         { src: '/images/loot.jpg', alt: 'Loot' },
-        { src: '/images/garden.jpg', alt: 'Garden' },
-        { src: '/images/kids-skiing.jpg', alt: 'Kids skiing' },
-        { src: '/images/matt-tiffany-prom.jpg', alt: 'Matt and Tiffany prom' },
-        { src: '/images/family-old.jpg', alt: 'Family old photo' },
-        { src: '/images/bryce-canyon.jpg', alt: 'Bryce Canyon' }
+        { src: '/images/garden.jpg', alt: 'Garden' }
       ]
     }
   },
@@ -84,18 +84,18 @@ const cards: Card[] = [
         'Kill count: 6 mice, 3 voles, 1 bird'
       ],
       photos: [
+        { src: '/images/molly7.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly9.jpg', alt: 'Molly the Leonberger' },
+        { src: '/images/molly-and-cats.jpg', alt: 'Molly and cats' },
         { src: '/images/molly1.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly2.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly3.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly4.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly5.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly6.jpg', alt: 'Molly the Leonberger' },
-        { src: '/images/molly7.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly8.jpg', alt: 'Molly the Leonberger' },
-        { src: '/images/molly9.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly13.jpg', alt: 'Molly the Leonberger' },
-        { src: '/images/mollypuppy.jpg', alt: 'Molly as a puppy' },
-        { src: '/images/molly-and-cats.jpg', alt: 'Molly and cats' }
+        { src: '/images/mollypuppy.jpg', alt: 'Molly as a puppy' }
       ]
     }
   },
