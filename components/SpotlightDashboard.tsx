@@ -15,6 +15,8 @@ const randomMemoryPhotos: Photo[] = [
   { src: '/images/hiking-snow.jpg', alt: 'Hiking in the snow' },
   { src: '/images/waterfall.jpg', alt: 'Waterfall' },
   { src: '/images/matt-tiffany-old.jpg', alt: 'Matt and Tiffany' },
+  { src: '/images/tree-farm-old.jpg', alt: 'Tree farm' },
+  { src: '/images/christmas-tree-old.jpg', alt: 'Christmas tree' },
 ];
 
 type Photo = {
