@@ -14,6 +14,7 @@ const randomMemoryPhotos: Photo[] = [
   { src: '/images/mtrainier.jpg', alt: 'Mt Rainier' },
   { src: '/images/hiking-snow.jpg', alt: 'Hiking in the snow' },
   { src: '/images/waterfall.jpg', alt: 'Waterfall' },
+  { src: '/images/matt-tiffany-old.jpg', alt: 'Matt and Tiffany' },
 ];
 
 type Photo = {
@@ -58,7 +59,11 @@ const cards: Card[] = [
         { src: '/images/moose.jpg', alt: 'Moose' },
         { src: '/images/daniel-emilia-manito.jpg', alt: 'Daniel and Emilia at Manito' },
         { src: '/images/loot.jpg', alt: 'Loot' },
-        { src: '/images/garden.jpg', alt: 'Garden' }
+        { src: '/images/garden.jpg', alt: 'Garden' },
+        { src: '/images/kids-skiing.jpg', alt: 'Kids skiing' },
+        { src: '/images/matt-tiffany-prom.jpg', alt: 'Matt and Tiffany prom' },
+        { src: '/images/family-old.jpg', alt: 'Family old photo' },
+        { src: '/images/bryce-canyon.jpg', alt: 'Bryce Canyon' }
       ]
     }
   },
@@ -87,7 +92,8 @@ const cards: Card[] = [
         { src: '/images/molly8.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly9.jpg', alt: 'Molly the Leonberger' },
         { src: '/images/molly13.jpg', alt: 'Molly the Leonberger' },
-        { src: '/images/mollypuppy.jpg', alt: 'Molly as a puppy' }
+        { src: '/images/mollypuppy.jpg', alt: 'Molly as a puppy' },
+        { src: '/images/molly-and-cats.jpg', alt: 'Molly and cats' }
       ]
     }
   },
